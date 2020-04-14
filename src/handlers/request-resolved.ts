@@ -1,4 +1,4 @@
 export default () => async () => {
-  // TODO: Stop monitoring item.
+  // TODO: Remove item from watch list.
   // TODO: Withdraw pending crowdfunding rewards.
 }

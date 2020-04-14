@@ -77,6 +77,19 @@ const gtcrFactory = new ethers.Contract(
     )
   )
 
-  console.info()
-  console.info('Done. Watching for blockchain events.')
+  console.info('')
+  console.info('Done setting up listeners.')
+
+  // TODO: Scan contracts requests.
+  // - Withdraw crowdfunding rewards if request was executed already.
+  // - Execute pending requests. The request-resolved event listener will
+  // remove it from the watchlist and withdraw the any pending
+  // crowdfunding rewards.
+  // - Add requests in the challenge period to watchlist.
+
+  // TODO: Fetch requests in the watchlist every X minutes.
+  // - Verify if they passed the challenge period.
+  // - Execute the request. The request-resolved event listener will
+  // remove it from the watchlist and withdraw the any pending
+  // crowdfunding rewards.
 })()

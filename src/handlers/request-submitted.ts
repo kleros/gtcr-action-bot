@@ -1,3 +1,3 @@
 export default () => async () => {
-  // TODO: Add to DB and start monitoring.
+  // TODO: Add to request o watchlist.
 }
