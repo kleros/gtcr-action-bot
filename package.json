@@ -23,6 +23,10 @@
     "gtcr",
     "bot"
   ],
+  "dependencies": {
+    "@kleros/tcr": "^1.7.1",
+    "ethers": "^4.0.46"
+  },
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
