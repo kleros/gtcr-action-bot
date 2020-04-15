@@ -11,8 +11,9 @@ export default async function addTCRListeners(tcr: ethers.Contract) {
   )
 
   // Request resolved.
+  // TODO: Filter out unresolved item status change events.
   tcr.on(
-    tcr.filters.ItemStatusChange(null, null, null, null, true),
+    tcr.filters.ItemStatusChange(),
     requestResolvedHandler()
   )
 
