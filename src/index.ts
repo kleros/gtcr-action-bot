@@ -16,6 +16,7 @@ dotenv.config({ path: ".env" })
 
 // Run env variable checks.
 import './utils/env-check'
+import { DB_KEY } from './utils/db'
 
 const db = wrapLevel(level('./db'))
 const provider = new ethers.providers.JsonRpcProvider(process.env.PROVIDER_URL)
@@ -55,7 +56,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
     // Fetch logs by scanning the blockchain in batches of 4 months
     // to avoid rate-limiting.
     const blocksPerMinute = Math.floor(
-      60 / (Number(process.env.BLOCK_TIME_MILLISECONDS as string) / 1000)
+      60 / (Number(process.env.BLOCK_TIME_SECONDS as string))
     )
     const blocksPerRequest = blocksPerMinute * 60 * 24 * 30 * 4
 
@@ -162,10 +163,12 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           // Challenge period passed with no challenges, execute it.
           tcr.executeRequest(_itemID)
         } else {
-          await db.put(tcr.address, {
-            ...(await db.get(tcr.address)),
+          const dbState = await db.get(DB_KEY)
+          dbState[tcr.address] = {
+            ...dbState[tcr.address],
             [_itemID]: submissionTime.add(challengePeriodDuration).toString()
-          })
+          }
+          await db.put(DB_KEY, dbState)
         }
       })
 
@@ -185,9 +188,24 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
       ))
     })
 
-    // TODO: Fetch requests in the watchlist every X minutes.
-    // - Verify if they passed the challenge period.
-    // - Execute the request. The request-resolved event listener will
-    // remove it from the watchlist and withdraw the any pending
-    // crowdfunding rewards.
+    // Check watchlist every POLL_PERIOD_MINUTES to see
+    // if any submissions entered the request exectution period
+    // (aka finished the challenge period.)
+    setInterval(async () => {
+      const [dbState, latestBlock] = await Promise.all([
+        db.get(DB_KEY),
+        provider.getBlock('latest')
+      ])
+      const { timestamp } = latestBlock
+
+      Object.keys(dbState).forEach(tcrAddress => {
+        const tcrWatchList = dbState[tcrAddress]
+        Object.keys(tcrWatchList).forEach(itemID => {
+          const challengePeriodEnd = dbState[tcrAddress][itemID]
+          if (timestamp < Number(challengePeriodEnd)) return
+
+          new ethers.Contract(tcrAddress, _GeneralizedTCR.abi, signer).executeRequest(itemID)
+        })
+      })
+    }, Number(process.env.POLL_PERIOD_MINUTES) * 60 * 1000)
   })()

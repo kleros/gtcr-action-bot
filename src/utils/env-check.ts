@@ -11,9 +11,9 @@ if (!process.env.FACTORY_ADDRESS) {
   )
 }
 
-if (!process.env.BLOCK_TIME_MILLISECONDS) {
+if (!process.env.BLOCK_TIME_SECONDS) {
   throw new Error(
-    'Network block time not set. Please set the BLOCK_TIME_MILLISECONDS environment variable'
+    'Network block time not set. Please set the BLOCK_TIME_SECONDS environment variable'
   )
 }
 
@@ -32,5 +32,17 @@ if (!process.env.WALLET_KEY) {
 if (!process.env.BATCH_WITHDRAW_ADDRESS) {
   throw new Error(
     'Batch withdraw contract address not set. Please set the BATCH_WITHDRAW_ADDRESS environment variable so the bot can withdraw rewards in batches.'
+  )
+}
+
+if (!process.env.POLL_PERIOD_MINUTES) {
+  throw new Error(
+    'Poll period duration not set. Please set the POLL_PERIOD_MINUTES environment variable.'
+  )
+}
+
+if (Number(process.env.POLL_PERIOD_MINUTES) < Number(process.env.BLOCK_TIME_SECONDS) * 2) {
+  throw new Error(
+    'The poll period must be longer than twice the block time to avoid sending transactions based on outdated data.'
   )
 }

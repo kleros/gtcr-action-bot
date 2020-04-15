@@ -1,6 +1,7 @@
 import withdrawRewards from "../utils/withdraw-rewards"
 import { BigNumber } from "ethers/utils"
 import { ethers } from "ethers"
+import { DB_KEY } from "../utils/db"
 
 /**
  * Builds a handler for request resolved events (or rather, ItemStatusChange events with resolved value set to true.)
@@ -28,8 +29,8 @@ export default (
       provider
     )
 
-    const contractWatchList = await db.get(tcr.address)
-    delete contractWatchList[_itemID]
+    const dbState = await db.get(DB_KEY)
+    delete dbState[tcr.address][_itemID]
 
-    await db.put(contractWatchList)
+    await db.put(DB_KEY, dbState)
   }

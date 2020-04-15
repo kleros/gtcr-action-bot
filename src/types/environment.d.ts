@@ -5,9 +5,10 @@ declare global {
     interface ProcessEnv {
       FACTORY_ADDRESS: string
       PROVIDER_URL: string
-      BLOCK_TIME_MILLISECONDS: string
+      BLOCK_TIME_SECONDS: string
       WALLET_KEY: string
-      BATCH_WITHDRAW_ADDRESS: string
+      BATCH_WITHDRAW_ADDRESS: string,
+      POLL_PERIOD_MINUTES: string
     }
   }
 }
