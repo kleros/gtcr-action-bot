@@ -2,6 +2,7 @@ import { ethers } from 'ethers'
 
 import _GTCRFactory from '@kleros/tcr/build/contracts/GTCRFactory.json'
 import _GeneralizedTCR from '@kleros/tcr/build/contracts/GeneralizedTCR.json'
+import _BatchWidthdraw from '@kleros/tcr/build/contracts/BatchWithdraw.json'
 
 import addTCRListeners from './handlers'
 import getSweepIntervals from './utils/get-intervals'
@@ -11,14 +12,21 @@ dotenv.config({ path: ".env" })
 
 // Run env variable checks.
 import './utils/env-check'
+import { bigNumberify } from 'ethers/utils'
 
 const provider = new ethers.providers.JsonRpcProvider(process.env.PROVIDER_URL)
 provider.pollingInterval = 60 * 1000 // Poll every minute.
+const signer = new ethers.Wallet(process.env.WALLET_KEY, provider)
 
 const gtcrFactory = new ethers.Contract(
   process.env.FACTORY_ADDRESS as string,
   _GTCRFactory.abi,
-  provider
+  signer
+)
+const batchWithdraw = new ethers.Contract(
+  process.env.BATCH_WITHDRAW_ADDRESS as string,
+  _BatchWidthdraw.abi,
+  signer
 )
 
 const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
@@ -28,11 +36,12 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
     // Initial setup.
     console.info('Booting...')
     console.info()
-    const [currBlock, network] = await Promise.all([
-      provider.getBlockNumber(),
+    const [latestBlock, network] = await Promise.all([
+      provider.getBlock('latest'),
       provider.getNetwork()
     ])
 
+    const { timestamp, number: currBlock } = latestBlock
     console.info(`Connected to ${network.name} of chain of ID ${network.chainId}`)
     console.info(`GTCR Factory deployed at ${process.env.FACTORY_ADDRESS}`)
 
@@ -63,14 +72,14 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
     ))
       .reduce((acc, curr) => [...acc, ...curr])
       .map(rawEvent => gtcrFactory.interface.parseLog(rawEvent))
-      .map(({ values: { _address } }) => new ethers.Contract(_address, _GeneralizedTCR.abi, provider))
+      .map(({ values: { _address } }) => new ethers.Contract(_address, _GeneralizedTCR.abi, signer))
 
     // Add listeners for events emitted by the TCRs and
     // do the same for new TCRs created while the bot is running.
     await Promise.all(tcrs.map(tcr => addTCRListeners(tcr)))
     gtcrFactory.on(gtcrFactory.filters.NewGTCR(), _address =>
       addTCRListeners(
-        new ethers.Contract(_address, _GeneralizedTCR.abi, provider),
+        new ethers.Contract(_address, _GeneralizedTCR.abi, signer),
       )
     )
 
@@ -88,7 +97,11 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
       // The ItemStatusChange event is emitted when a request is resolved
       // and contain the status of the request, so we can use it
       // to separate requests into resolved and not resolved.
-      const [requestSubmittedEvents, itemStatusChangeEvents] = await Promise.all(
+      const [
+        requestSubmittedEvents,
+        itemStatusChangeEvents,
+        challengePeriodDuration
+      ] = await Promise.all(
         [
           (await Promise.all(
             intervals.map(async interval => provider.getLogs({
@@ -108,7 +121,9 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
             }))
           ))
           .reduce((acc, curr) => [...acc, ...curr])
-          .map(rawEvent => tcr.interface.parseLog(rawEvent))
+          .map(rawEvent => tcr.interface.parseLog(rawEvent)),
+
+          tcr.challengePeriodDuration()
         ]
       )
 
@@ -124,20 +139,58 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
             )
         )
 
+      pendingRequests.forEach(async ({ values: { _itemID, _requestID }}) => {
+        const { submissionTime, disputed } = await tcr.getRequestInfo(_itemID, _requestID)
+        if (disputed) return // There is an ongoing dispute. No-op.
+
+        if (bigNumberify(timestamp).sub(submissionTime).gt(challengePeriodDuration)) {
+          // Challenge period passed with no challenges, execute it.
+          tcr.executeRequest(_itemID)
+        } else {
+          // TODO: The challenge period did not pass yet. Add it to the watchlist.
+        }
+      })
+
       // We use the pending requests calculated previously
-      // to learn which requests are resolved.
+      // to learn which requests are resolved and may have.
+      // withdrawable rewards.
       const resolvedRequests = requestSubmittedEvents
         .filter(e => !pendingRequests.includes(e))
 
+      resolvedRequests.forEach(async ({ values: {_itemID, _requestID }}) => {
+        const { disputed } = await tcr.getRequestInfo(_itemID, _requestID)
+        if (!disputed) return // No rewards to withdraw if there was never a dispute.
 
+        const contributionEvents = (await Promise.all(
+          intervals.map(async interval => provider.getLogs({
+            ...tcr.filters.AppealContribution(_itemID, null, _requestID),
+          }))
+        ))
+        .reduce((acc, curr) => [...acc, ...curr])
+        .map(rawEvent => tcr.interface.parseLog(rawEvent))
+        .filter(({ values: { _round }}) => _round.toNumber() !== 0) // Ignore first round
 
+        // A new AppealContribution event is emmited every time
+        // someone makes a contribution.
+        // Since batchRoundWithdraw() withdraws all contributions from
+        // every round by a contributor, we avoid withdrawing
+        // for the same contributor more than once by using a set.
+        const done = new Set()
+        contributionEvents.forEach(async ({ values: { _contributor, _itemID, _request }}) => {
+          if (done.has(_contributor))
+          await batchWithdraw.batchRoundWithdraw(
+            tcr.address,
+            _contributor,
+            _itemID,
+            _request,
+            0,
+            0
+          )
+
+          done.add(_contributor)
+        })
+      })
     })
-
-    // - Withdraw crowdfunding rewards if request was executed already.
-    // - Execute pending requests. The request-resolved event listener will
-    // remove it from the watchlist and withdraw the any pending
-    // crowdfunding rewards.
-    // - Add requests in the challenge period to watchlist.
 
     // TODO: Fetch requests in the watchlist every X minutes.
     // - Verify if they passed the challenge period.
