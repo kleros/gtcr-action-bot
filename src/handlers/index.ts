@@ -3,7 +3,12 @@ import { ethers } from 'ethers'
 import requestSubmittedHandler from './request-submitted'
 import requestResolvedHandler from './request-resolved'
 
-export default async function addTCRListeners(tcr: ethers.Contract) {
+export default async function addTCRListeners(
+  tcr: ethers.Contract,
+  batchWithdraw: ethers.Contract,
+  intervals: BlockInterval[],
+  provider: ethers.providers.Provider
+) {
   // Submissions and removal requests.
   tcr.on(
     tcr.filters.RequestSubmitted(),
@@ -11,10 +16,14 @@ export default async function addTCRListeners(tcr: ethers.Contract) {
   )
 
   // Request resolved.
-  // TODO: Filter out unresolved item status change events.
   tcr.on(
     tcr.filters.ItemStatusChange(),
-    requestResolvedHandler()
+    requestResolvedHandler(
+      tcr,
+      batchWithdraw,
+      intervals,
+      provider
+    )
   )
 
   console.info(`Done setting up listeners for ${tcr.address}`)

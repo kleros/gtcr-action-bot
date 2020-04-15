@@ -13,6 +13,7 @@ dotenv.config({ path: ".env" })
 // Run env variable checks.
 import './utils/env-check'
 import { bigNumberify } from 'ethers/utils'
+import withdrawRewards from './utils/withdraw-rewards'
 
 const provider = new ethers.providers.JsonRpcProvider(process.env.PROVIDER_URL)
 provider.pollingInterval = 60 * 1000 // Poll every minute.
@@ -76,10 +77,19 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
 
     // Add listeners for events emitted by the TCRs and
     // do the same for new TCRs created while the bot is running.
-    await Promise.all(tcrs.map(tcr => addTCRListeners(tcr)))
+    await Promise.all(tcrs.map(tcr => addTCRListeners(
+      tcr,
+      batchWithdraw,
+      intervals,
+      provider
+    )))
+
     gtcrFactory.on(gtcrFactory.filters.NewGTCR(), _address =>
       addTCRListeners(
         new ethers.Contract(_address, _GeneralizedTCR.abi, signer),
+        batchWithdraw,
+        intervals,
+        provider
       )
     )
 
@@ -157,39 +167,14 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
       const resolvedRequests = requestSubmittedEvents
         .filter(e => !pendingRequests.includes(e))
 
-      resolvedRequests.forEach(async ({ values: {_itemID, _requestID }}) => {
-        const { disputed } = await tcr.getRequestInfo(_itemID, _requestID)
-        if (!disputed) return // No rewards to withdraw if there was never a dispute.
-
-        const contributionEvents = (await Promise.all(
-          intervals.map(async interval => provider.getLogs({
-            ...tcr.filters.AppealContribution(_itemID, null, _requestID),
-          }))
-        ))
-        .reduce((acc, curr) => [...acc, ...curr])
-        .map(rawEvent => tcr.interface.parseLog(rawEvent))
-        .filter(({ values: { _round }}) => _round.toNumber() !== 0) // Ignore first round
-
-        // A new AppealContribution event is emmited every time
-        // someone makes a contribution.
-        // Since batchRoundWithdraw() withdraws all contributions from
-        // every round by a contributor, we avoid withdrawing
-        // for the same contributor more than once by using a set.
-        const done = new Set()
-        contributionEvents.forEach(async ({ values: { _contributor, _itemID, _request }}) => {
-          if (done.has(_contributor))
-          await batchWithdraw.batchRoundWithdraw(
-            tcr.address,
-            _contributor,
-            _itemID,
-            _request,
-            0,
-            0
-          )
-
-          done.add(_contributor)
-        })
-      })
+      resolvedRequests.forEach(({ values: {_itemID, _requestID }}) => withdrawRewards(
+        _itemID,
+        _requestID,
+        tcr,
+        batchWithdraw,
+        intervals,
+        provider
+      ))
     })
 
     // TODO: Fetch requests in the watchlist every X minutes.

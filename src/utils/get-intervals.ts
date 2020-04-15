@@ -4,7 +4,11 @@
  * @param currentBlock The current height of the blockchain.
  * @param blocksPerRequest The number of blocks to scan per request.
  */
-export default function (fromBlock: number, currentBlock: number, blocksPerRequest: number = 1000000) {
+export default function (
+  fromBlock: number,
+  currentBlock: number,
+  blocksPerRequest: number = 1000000
+) : BlockInterval[] {
   // Fetching event logs in a single request can (this was happening) cause
   // the provider to timeout the request.
   // To get around this we can split it into multiple, smaller requests.
