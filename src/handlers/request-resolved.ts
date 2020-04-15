@@ -9,7 +9,8 @@ export default (
   tcr: ethers.Contract,
   batchWithdraw: ethers.Contract,
   intervals: BlockInterval[],
-  provider: ethers.providers.Provider
+  provider: ethers.providers.Provider,
+  db: Level
 ) => async (
   _itemID: string,
   _requestIndex: BigNumber,
@@ -27,5 +28,8 @@ export default (
       provider
     )
 
-    // TODO: Remove item from watch list.
+    const contractWatchList = await db.get(tcr.address)
+    delete contractWatchList[_itemID]
+
+    await db.put(contractWatchList)
   }

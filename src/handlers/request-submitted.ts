@@ -1,6 +1,9 @@
 import { ethers } from "ethers"
 import { BigNumber } from "ethers/utils"
 
+/**
+ * Builds a handler for request submitted events.
+ */
 export default (db: Level, tcr: ethers.Contract) => async (
   _itemID: string,
   _requestIndex: BigNumber,

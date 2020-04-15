@@ -23,7 +23,8 @@ export default async function addTCRListeners(
       tcr,
       batchWithdraw,
       intervals,
-      provider
+      provider,
+      db
     )
   )
 
