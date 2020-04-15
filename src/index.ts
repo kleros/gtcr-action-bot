@@ -3,6 +3,9 @@ import { ethers } from 'ethers'
 import _GTCRFactory from '@kleros/tcr/build/contracts/GTCRFactory.json'
 import _GeneralizedTCR from '@kleros/tcr/build/contracts/GeneralizedTCR.json'
 
+import dotenv from "dotenv"
+
+dotenv.config({ path: ".env" })
 // Run env variable checks.
 import './utils/env-check'
 import addTCRListeners from './handlers'

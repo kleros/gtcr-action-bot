@@ -19,3 +19,10 @@ if (!process.env.BLOCK_TIME_MILLISECONDS) {
   )
   process.exit(1)
 }
+
+if (!process.env.FACTORY_BLOCK_NUM) {
+  console.error(
+    'Factory deployment block not set. Please set the FACTORY_BLOCK_NUM environment variable'
+  )
+  process.exit(1)
+}
