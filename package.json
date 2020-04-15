@@ -9,11 +9,11 @@
     "production": "yarn build && node dist/index.js",
     "lint:secrets": "secretlint \"**/*\"",
     "lint": "yarn lint:secrets",
-    "clean": "rimraf ./db/* && nodetouch ./db/.gitkeep",
-    "release": "standard-version",
-    "init": "tsc --init"
+    "cleanDB": "rimraf ./db/* && nodetouch ./db/.gitkeep",
+    "release": "standard-version"
   },
   "author": "Kleros",
+  "repository": "git@github.com:kleros/gtcr-action-bot.git",
   "license": "MIT",
   "private": true,
   "keywords": [
@@ -24,7 +24,8 @@
   "dependencies": {
     "@kleros/tcr": "^1.7.1",
     "dotenv": "^8.2.0",
-    "ethers": "^4.0.46"
+    "ethers": "^4.0.46",
+    "level": "^6.0.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
@@ -63,6 +64,5 @@
       "pre-commit": "yarn lint",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
-  },
-  "repository": "git@github.com:kleros/gtcr-action-bot.git"
+  }
 }

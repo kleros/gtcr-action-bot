@@ -1,4 +1,7 @@
 import { ethers } from 'ethers'
+import { bigNumberify } from 'ethers/utils'
+import dotenv from "dotenv"
+import level from 'level'
 
 import _GTCRFactory from '@kleros/tcr/build/contracts/GTCRFactory.json'
 import _GeneralizedTCR from '@kleros/tcr/build/contracts/GeneralizedTCR.json'
@@ -6,15 +9,15 @@ import _BatchWidthdraw from '@kleros/tcr/build/contracts/BatchWithdraw.json'
 
 import addTCRListeners from './handlers'
 import getSweepIntervals from './utils/get-intervals'
-import dotenv from "dotenv"
+import withdrawRewards from './utils/withdraw-rewards'
+import wrapLevel from './utils/wrap-level'
 
 dotenv.config({ path: ".env" })
 
 // Run env variable checks.
 import './utils/env-check'
-import { bigNumberify } from 'ethers/utils'
-import withdrawRewards from './utils/withdraw-rewards'
 
+const db = wrapLevel(level('./db'))
 const provider = new ethers.providers.JsonRpcProvider(process.env.PROVIDER_URL)
 provider.pollingInterval = 60 * 1000 // Poll every minute.
 const signer = new ethers.Wallet(process.env.WALLET_KEY, provider)
@@ -81,7 +84,8 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
       tcr,
       batchWithdraw,
       intervals,
-      provider
+      provider,
+      db
     )))
 
     gtcrFactory.on(gtcrFactory.filters.NewGTCR(), _address =>
@@ -89,7 +93,8 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
         new ethers.Contract(_address, _GeneralizedTCR.abi, signer),
         batchWithdraw,
         intervals,
-        provider
+        provider,
+        db
       )
     )
 
@@ -157,7 +162,10 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           // Challenge period passed with no challenges, execute it.
           tcr.executeRequest(_itemID)
         } else {
-          // TODO: The challenge period did not pass yet. Add it to the watchlist.
+          await db.put(tcr.address, {
+            ...(await db.get(tcr.address)),
+            [_itemID]: submissionTime.add(challengePeriodDuration).toString()
+          })
         }
       })
 

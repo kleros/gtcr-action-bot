@@ -7,12 +7,13 @@ export default async function addTCRListeners(
   tcr: ethers.Contract,
   batchWithdraw: ethers.Contract,
   intervals: BlockInterval[],
-  provider: ethers.providers.Provider
+  provider: ethers.providers.Provider,
+  db: Level
 ) {
   // Submissions and removal requests.
   tcr.on(
     tcr.filters.RequestSubmitted(),
-    requestSubmittedHandler()
+    requestSubmittedHandler(db ,tcr)
   )
 
   // Request resolved.
