@@ -28,5 +28,5 @@ export default async function addTCRListeners(
     )
   )
 
-  console.info(`Done setting up listeners for ${tcr.address}`)
+  console.info(`Setup listeners for ${tcr.address}`)
 }

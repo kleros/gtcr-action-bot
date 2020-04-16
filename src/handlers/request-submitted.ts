@@ -22,5 +22,5 @@ export default (db: Level, tcr: ethers.Contract) => async (
 
   await db.put(DB_KEY, dbState)
   console.info('')
-  console.info(`New request! Added item ${_itemID} of TCR at ${tcr.address} to watchlist`)
+  console.info(`New request! Added item ${_itemID} of TCR at ${tcr.address} to watchlist`.cyan)
 }

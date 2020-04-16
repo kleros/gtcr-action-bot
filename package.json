@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node-dev src/index.ts",
     "build": "rimraf dist && tsc",
-    "production": "yarn build && node dist/index.js",
+    "production": "yarn build && node dist/src/index.js",
     "lint:secrets": "secretlint \"**/*\"",
     "lint": "yarn lint:secrets",
     "cleanDB": "rimraf ./db/* && nodetouch ./db/.gitkeep",
@@ -23,6 +23,7 @@
   ],
   "dependencies": {
     "@kleros/tcr": "^1.7.1",
+    "colors": "^1.4.0",
     "dotenv": "^8.2.0",
     "ethers": "^4.0.46",
     "level": "^6.0.1"

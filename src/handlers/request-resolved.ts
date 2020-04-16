@@ -1,6 +1,7 @@
 import { BigNumber } from "ethers/utils"
 import { ethers } from "ethers"
 import { DB_KEY } from "../utils/db"
+import withdrawRewardsRemoveWatchlist from "../utils/withdraw-rewards"
 
 /**
  * Builds a handler for request resolved events (or rather, ItemStatusChange events with resolved value set to true.)
@@ -23,20 +24,14 @@ export default (
     console.info('')
     console.info(`Request executed for item ${_itemID} of TCR at ${tcr.address}`)
     if (_disputed) {
-      console.info(`Withdrawing rewards for item ${_itemID} of TCR at ${tcr.address}`)
-      await batchWithdraw.batchRoundWithdraw(
+      await withdrawRewardsRemoveWatchlist(
         _itemID,
         _requestIndex,
         tcr,
         batchWithdraw,
         intervals,
-        provider
+        provider,
+        db
       )
     }
-
-    const dbState = await db.get(DB_KEY)
-    delete dbState[tcr.address][_itemID]
-    await db.put(DB_KEY, dbState)
-
-    console.info(`Removed item ${_itemID} of TCR at ${tcr.address} from watchlist.`)
   }

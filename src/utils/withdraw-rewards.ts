@@ -1,13 +1,15 @@
 import { ethers } from "ethers"
 import { BigNumber } from "ethers/utils"
+import { DB_KEY } from "./db"
 
-export default async function withdrawRewards(
+export default async function withdrawRewardsRemoveWatchlist(
   itemID: string,
   requestID: BigNumber,
   tcr: ethers.Contract,
   batchWithdraw: ethers.Contract,
   blockIntervals: BlockInterval[],
-  provider: ethers.providers.Provider
+  provider: ethers.providers.Provider,
+  db: Level
 ) {
   const { disputed } = await tcr.getRequestInfo(itemID, requestID)
   if (!disputed) return // No rewards to withdraw if there was never a dispute.
@@ -27,17 +29,27 @@ export default async function withdrawRewards(
   // every round by a contributor, we avoid withdrawing
   // for the same contributor more than once by using a set.
   const done = new Set()
-  contributionEvents.forEach(async ({ values: { _contributor, itemID, _request } }) => {
-    if (done.has(_contributor))
-      await batchWithdraw.batchRoundWithdraw(
-        tcr.address,
-        _contributor,
-        itemID,
-        _request,
-        0,
-        0
-      )
+  for (let contributionEvent of contributionEvents) {
+    const { values: { _contributor, itemID, _request } } = contributionEvent
+    if (done.has(_contributor)) return
+
+    console.info(` Withdrawing ${_contributor} rewards for item ${itemID} of TCR at ${tcr.address}`.cyan)
+    await batchWithdraw.batchRoundWithdraw(
+      tcr.address,
+      _contributor,
+      itemID,
+      _request,
+      0,
+      0
+    )
 
     done.add(_contributor)
-  })
+  }
+
+
+  const dbState = await db.get(DB_KEY)
+  delete dbState[tcr.address][itemID]
+  await db.put(DB_KEY, dbState)
+
+  console.info(` Removed item ${itemID} of TCR at ${tcr.address} from watchlist.`.cyan)
 }
