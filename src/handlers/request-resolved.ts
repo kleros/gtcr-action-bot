@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers/utils"
 import { ethers } from "ethers"
-import { DB_KEY } from "../utils/db"
 import withdrawRewardsRemoveWatchlist from "../utils/withdraw-rewards"
+import Store from "../utils/store"
 
 /**
  * Builds a handler for request resolved events (or rather, ItemStatusChange events with resolved value set to true.)
@@ -11,7 +11,7 @@ export default (
   batchWithdraw: ethers.Contract,
   intervals: BlockInterval[],
   provider: ethers.providers.Provider,
-  db: Level
+  store: Store
 ) => async (
   _itemID: string,
   _requestIndex: BigNumber,
@@ -31,7 +31,7 @@ export default (
         batchWithdraw,
         intervals,
         provider,
-        db
+        store
       )
     }
   }

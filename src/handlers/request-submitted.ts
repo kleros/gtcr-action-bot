@@ -1,11 +1,12 @@
 import { ethers } from "ethers"
 import { BigNumber } from "ethers/utils"
 import { DB_KEY } from "../utils/db"
+import Store from "../utils/store"
 
 /**
  * Builds a handler for request submitted events.
  */
-export default (db: Level, tcr: ethers.Contract) => async (
+export default (store: Store, tcr: ethers.Contract) => async (
   _itemID: string,
   _requestIndex: BigNumber,
   _requestType: number
@@ -14,13 +15,12 @@ export default (db: Level, tcr: ethers.Contract) => async (
   const { submissionTime } = await tcr.getRequestInfo(_itemID, _requestIndex)
 
   // Save the end the challenge period on local storage.
-  const dbState = await db.get(DB_KEY)
-  dbState[tcr.address] = {
-    ...dbState[tcr.address],
-    [_itemID]: submissionTime.add(challengePeriodDuration).toString()
-  }
+  await store.addToWatchlist(
+    tcr.address,
+    _itemID,
+    submissionTime.add(challengePeriodDuration).toNumber()
+  )
 
-  await db.put(DB_KEY, dbState)
   console.info('')
   console.info(`New request! Added item ${_itemID} of TCR at ${tcr.address} to watchlist`.cyan)
 }

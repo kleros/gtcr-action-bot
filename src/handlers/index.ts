@@ -2,18 +2,19 @@ import { ethers } from 'ethers'
 
 import requestSubmittedHandler from './request-submitted'
 import requestResolvedHandler from './request-resolved'
+import Store from '../utils/store'
 
 export default async function addTCRListeners(
   tcr: ethers.Contract,
   batchWithdraw: ethers.Contract,
   intervals: BlockInterval[],
   provider: ethers.providers.Provider,
-  db: Level
+  store: Store
 ) {
   // Submissions and removal requests.
   tcr.on(
     tcr.filters.RequestSubmitted(),
-    requestSubmittedHandler(db ,tcr)
+    requestSubmittedHandler(store ,tcr)
   )
 
   // Request resolved.
@@ -24,7 +25,7 @@ export default async function addTCRListeners(
       batchWithdraw,
       intervals,
       provider,
-      db
+      store
     )
   )
 

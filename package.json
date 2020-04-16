@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "start": "ts-node-dev src/index.ts",
-    "build": "rimraf dist && tsc",
-    "production": "yarn build && node dist/src/index.js",
+    "build": "tsc",
+    "production": "tsc && node dist/src/index.js",
     "lint:secrets": "secretlint \"**/*\"",
     "lint": "yarn lint:secrets",
     "cleanDB": "rimraf ./db/* && nodetouch ./db/.gitkeep",

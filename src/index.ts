@@ -11,7 +11,7 @@ import _BatchWidthdraw from '@kleros/tcr/build/contracts/BatchWithdraw.json'
 import addTCRListeners from './handlers'
 import getSweepIntervals from './utils/get-intervals'
 import withdrawRewardsRemoveWatchlist from './utils/withdraw-rewards'
-import wrapLevel from './utils/wrap-level'
+import Store from './utils/store'
 import { version } from '../package.json'
 
 dotenv.config({ path: ".env" })
@@ -20,7 +20,7 @@ dotenv.config({ path: ".env" })
 import './utils/env-check'
 import { DB_KEY } from './utils/db'
 
-const db = wrapLevel(level('./db'))
+const store = new Store(level('./db'), DB_KEY)
 const provider = new ethers.providers.JsonRpcProvider(process.env.PROVIDER_URL)
 provider.pollingInterval = 60 * 1000 // Poll every minute.
 const signer = new ethers.Wallet(process.env.WALLET_KEY, provider)
@@ -94,7 +94,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
       batchWithdraw,
       intervals,
       provider,
-      db
+      store
     )))
 
     gtcrFactory.on(gtcrFactory.filters.NewGTCR(), _address =>
@@ -103,7 +103,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
         batchWithdraw,
         intervals,
         provider,
-        db
+        store
       )
     )
 
@@ -184,12 +184,11 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           console.info('  Executing it.'.cyan)
           await tcr.executeRequest(_itemID)
         } else {
-          const dbState = await db.get(DB_KEY)
-          dbState[tcr.address] = {
-            ...dbState[tcr.address],
-            [_itemID]: submissionTime.add(challengePeriodDuration).toString()
-          }
-          await db.put(DB_KEY, dbState)
+          await store.addToWatchlist(
+            tcr.address,
+            _itemID,
+            submissionTime.add(challengePeriodDuration).toNumber()
+          )
           console.info(`  Found item ${_itemID} of TCR at ${tcr.address} in the challenge period.` )
           console.info('  Added it to the watchlist.'.cyan)
         }
@@ -216,7 +215,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           batchWithdraw,
           intervals,
           provider,
-          db
+          store
         )
         resolvedRequestCount++
       }
@@ -233,10 +232,13 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
     // (aka finished the challenge period.)
     setInterval(async function watcher() {
       const [dbState, blockHeight] = await Promise.all([
-        db.get(DB_KEY),
+        store.getDB(),
         provider.getBlockNumber()
       ])
-      const { timestamp } = await provider.getBlock(blockHeight)
+
+      // Take previous block to avoid returning null due to outdated
+      // blockchain data.
+      const { timestamp } = await provider.getBlock(blockHeight-1)
 
       for (let tcrAddress of Object.keys(dbState)) {
         const tcrWatchList = dbState[tcrAddress]

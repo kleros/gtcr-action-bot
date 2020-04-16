@@ -1,6 +1,6 @@
 import { ethers } from "ethers"
 import { BigNumber } from "ethers/utils"
-import { DB_KEY } from "./db"
+import Store from "./store"
 
 export default async function withdrawRewardsRemoveWatchlist(
   itemID: string,
@@ -9,7 +9,7 @@ export default async function withdrawRewardsRemoveWatchlist(
   batchWithdraw: ethers.Contract,
   blockIntervals: BlockInterval[],
   provider: ethers.providers.Provider,
-  db: Level
+  store: Store
 ) {
   const { disputed } = await tcr.getRequestInfo(itemID, requestID)
   if (!disputed) return // No rewards to withdraw if there was never a dispute.
@@ -46,10 +46,6 @@ export default async function withdrawRewardsRemoveWatchlist(
     done.add(_contributor)
   }
 
-
-  const dbState = await db.get(DB_KEY)
-  delete dbState[tcr.address][itemID]
-  await db.put(DB_KEY, dbState)
-
+  await store.removeFromWatchlist(tcr.address, itemID)
   console.info(` Removed item ${itemID} of TCR at ${tcr.address} from watchlist.`.cyan)
 }
