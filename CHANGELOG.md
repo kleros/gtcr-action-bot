@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/kleros/gtcr-action-bot/compare/v0.1.2...v0.1.3) (2020-04-16)
+
+
+### Bug Fixes
+
+* handle database object initialization ([8044593](https://github.com/kleros/gtcr-action-bot/commit/8044593bf0347d4d6ebdc2a90f740a0b3cf1c1f7))
+
 ### [0.1.2](https://github.com/kleros/gtcr-action-bot/compare/v0.1.1...v0.1.2) (2020-04-16)
 
 
