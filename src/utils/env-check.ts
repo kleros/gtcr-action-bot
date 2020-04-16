@@ -41,7 +41,7 @@ if (!process.env.POLL_PERIOD_MINUTES) {
   )
 }
 
-if (Number(process.env.POLL_PERIOD_MINUTES) < Number(process.env.BLOCK_TIME_SECONDS) * 2) {
+if (Number(process.env.POLL_PERIOD_MINUTES) > Number(process.env.BLOCK_TIME_SECONDS) * 2 * 60) {
   throw new Error(
     'The poll period must be longer than twice the block time to avoid sending transactions based on outdated data.'
   )

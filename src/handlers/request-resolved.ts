@@ -1,4 +1,3 @@
-import withdrawRewards from "../utils/withdraw-rewards"
 import { BigNumber } from "ethers/utils"
 import { ethers } from "ethers"
 import { DB_KEY } from "../utils/db"
@@ -20,17 +19,24 @@ export default (
   _resolved: boolean
 ) => {
     if (!_resolved) return
-    await withdrawRewards(
-      _itemID,
-      _requestIndex,
-      tcr,
-      batchWithdraw,
-      intervals,
-      provider
-    )
+
+    console.info('')
+    console.info(`Request executed for item ${_itemID} of TCR at ${tcr.address}`)
+    if (_disputed) {
+      console.info(`Withdrawing rewards for item ${_itemID} of TCR at ${tcr.address}`)
+      await batchWithdraw.batchRoundWithdraw(
+        _itemID,
+        _requestIndex,
+        tcr,
+        batchWithdraw,
+        intervals,
+        provider
+      )
+    }
 
     const dbState = await db.get(DB_KEY)
     delete dbState[tcr.address][_itemID]
-
     await db.put(DB_KEY, dbState)
+
+    console.info(`Removed item ${_itemID} of TCR at ${tcr.address} from watchlist.`)
   }

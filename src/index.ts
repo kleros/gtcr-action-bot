@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { bigNumberify } from 'ethers/utils'
+import { bigNumberify, formatEther } from 'ethers/utils'
 import dotenv from "dotenv"
 import level from 'level'
 
@@ -37,18 +37,21 @@ const batchWithdraw = new ethers.Contract(
 const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
 
   // Run bot.
-  ; (async () => {
+  ; (async function main() {
     // Initial setup.
     console.info('Booting...')
     console.info()
-    const [latestBlock, network] = await Promise.all([
-      provider.getBlock('latest'),
-      provider.getNetwork()
+    const [blockHeight, network, balance] = await Promise.all([
+      provider.getBlockNumber(),
+      provider.getNetwork(),
+      signer.getBalance()
     ])
 
-    const { timestamp, number: currBlock } = latestBlock
+    const { timestamp, number: currBlock } = await provider.getBlock(blockHeight)
     console.info(`Connected to ${network.name} of chain of ID ${network.chainId}`)
     console.info(`GTCR Factory deployed at ${process.env.FACTORY_ADDRESS}`)
+    console.info(`Bot wallet: ${signer.address}`)
+    console.info(`Balance   : ${formatEther(balance)} Ξ`)
 
     // Fetch all TCR addresses from factory logs, instantiate and add
     // event listeners.
@@ -105,8 +108,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
 
     // Scan contracts requests all to execute pending requests
     // and withdraw funds.
-    tcrs.forEach(async tcr => {
-
+    for (let tcr of tcrs) {
       // To get all pending and resolved requests efficiently, we use
       // the GeneralizedTCR.RequestSubmitted and
       // GeneralizedTCR.ItemStatusChange events.
@@ -155,13 +157,16 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
             )
         )
 
-      pendingRequests.forEach(async ({ values: { _itemID, _requestID }}) => {
-        const { submissionTime, disputed } = await tcr.getRequestInfo(_itemID, _requestID)
+      for (let pendingRequest of pendingRequests) {
+        const { values: { _itemID, _requestIndex }} = pendingRequest
+        const { submissionTime, disputed } = await tcr.getRequestInfo(_itemID, _requestIndex)
         if (disputed) return // There is an ongoing dispute. No-op.
 
         if (bigNumberify(timestamp).sub(submissionTime).gt(challengePeriodDuration)) {
           // Challenge period passed with no challenges, execute it.
-          tcr.executeRequest(_itemID)
+          console.info(`Found executable request for item of ID ${_itemID} of TCR at ${tcr.address}` )
+          console.info('Executing it.')
+          await tcr.executeRequest(_itemID)
         } else {
           const dbState = await db.get(DB_KEY)
           dbState[tcr.address] = {
@@ -169,8 +174,10 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
             [_itemID]: submissionTime.add(challengePeriodDuration).toString()
           }
           await db.put(DB_KEY, dbState)
+          console.info(`Found item ${_itemID} of TCR at ${tcr.address} in the challenge period.` )
+          console.info('Added it to the watchlist.')
         }
-      })
+      }
 
       // We use the pending requests calculated previously
       // to learn which requests are resolved and may have.
@@ -178,34 +185,50 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
       const resolvedRequests = requestSubmittedEvents
         .filter(e => !pendingRequests.includes(e))
 
-      resolvedRequests.forEach(({ values: {_itemID, _requestID }}) => withdrawRewards(
-        _itemID,
-        _requestID,
-        tcr,
-        batchWithdraw,
-        intervals,
-        provider
-      ))
-    })
+      for (let resolvedRequest of resolvedRequests) {
+        const { values: {_itemID, _requestIndex }} = resolvedRequest
+        withdrawRewards(
+          _itemID,
+          _requestIndex,
+          tcr,
+          batchWithdraw,
+          intervals,
+          provider
+        )
+      }
+    }
+
+    console.info('')
+    console.info('Done scanning and executing pending requests and withdrawals.')
+    console.info('Listening for new requests...')
 
     // Check watchlist every POLL_PERIOD_MINUTES to see
     // if any submissions entered the request exectution period
     // (aka finished the challenge period.)
-    setInterval(async () => {
-      const [dbState, latestBlock] = await Promise.all([
+    setInterval(async function watcher() {
+      console.info('Checking watchlist...')
+      const [dbState, blockHeight] = await Promise.all([
         db.get(DB_KEY),
-        provider.getBlock('latest')
+        provider.getBlockNumber()
       ])
-      const { timestamp } = latestBlock
+      const { timestamp } = await provider.getBlock(blockHeight)
 
-      Object.keys(dbState).forEach(tcrAddress => {
+      for (let tcrAddress of Object.keys(dbState)) {
         const tcrWatchList = dbState[tcrAddress]
-        Object.keys(tcrWatchList).forEach(itemID => {
+        for (let itemID of Object.keys(tcrWatchList)) {
           const challengePeriodEnd = dbState[tcrAddress][itemID]
           if (timestamp < Number(challengePeriodEnd)) return
 
-          new ethers.Contract(tcrAddress, _GeneralizedTCR.abi, signer).executeRequest(itemID)
-        })
-      })
+          console.info('')
+          console.info(`Found executable request for item of ID ${itemID} of TCR at ${tcrAddress}` )
+          console.info('Executing it.')
+          try {
+            await new ethers.Contract(tcrAddress, _GeneralizedTCR.abi, signer).executeRequest(itemID)
+          } catch (err) {
+            console.warn(`Failed to request for item of ID ${itemID} of TCR at ${tcrAddress}` )
+            console.warn('Reason:', err)
+          }
+        }
+      }
     }, Number(process.env.POLL_PERIOD_MINUTES) * 60 * 1000)
   })()
