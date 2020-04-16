@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://github.com/kleros/gtcr-action-bot/compare/v0.1.1...v0.1.2) (2020-04-16)
+
+
+### Bug Fixes
+
+* race conditions, typos and verbosity ([eda2066](https://github.com/kleros/gtcr-action-bot/commit/eda2066c36e1f0535b67be7bcb7480437d10ebc6))
+* various bugs and verbosity ([3e499df](https://github.com/kleros/gtcr-action-bot/commit/3e499df2a034c5ef0e475989e8e3a817ddd8b22d))
+
 ### 0.1.1 (2020-04-15)
 
 
