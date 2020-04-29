@@ -24,7 +24,7 @@ This bot watches a GTCR Factory contract and all GTCR contracts spawned from it.
 
 > To run the service in production mode use `yarn production`.
 
-> To start with PM2 use `pm2 start yarn --name gtcr-action-bot -- production`
+> To start with PM2 use `pm2 start yarn --interpreter bash --name gtcr-action-bot -- production`
 
 ## Other Scripts
 
