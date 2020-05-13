@@ -8,8 +8,7 @@ import Store from "../utils/store"
  */
 export default (store: Store, tcr: ethers.Contract) => async (
   _itemID: string,
-  _requestIndex: BigNumber,
-  _requestType: number
+  _requestIndex: BigNumber
 ) => {
   const challengePeriodDuration = await tcr.challengePeriodDuration()
   const { submissionTime } = await tcr.getRequestInfo(_itemID, _requestIndex)
