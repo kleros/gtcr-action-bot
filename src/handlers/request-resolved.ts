@@ -11,27 +11,29 @@ export default (
   batchWithdraw: ethers.Contract,
   intervals: BlockInterval[],
   provider: ethers.providers.Provider,
-  store: Store
+  store: Store,
+  signer: ethers.Wallet
 ) => async (
-  _itemID: string,
-  _requestIndex: BigNumber,
+  itemID: string,
+  requestIndex: BigNumber,
   _roundIndex: BigNumber,
-  _disputed: boolean,
+  disputed: boolean,
   _resolved: boolean
 ) => {
     if (!_resolved) return
 
     console.info('')
-    console.info(`Request executed for item ${_itemID} of TCR at ${tcr.address}`)
-    if (_disputed) {
+    console.info(`Request executed for item ${itemID} of TCR at ${tcr.address}`)
+    if (disputed) {
       await withdrawRewardsRemoveWatchlist(
-        _itemID,
-        _requestIndex,
+        itemID,
+        requestIndex,
         tcr,
         batchWithdraw,
         intervals,
         provider,
-        store
+        store,
+        signer
       )
     }
   }

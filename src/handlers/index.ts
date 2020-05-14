@@ -9,7 +9,8 @@ export default async function addTCRListeners(
   batchWithdraw: ethers.Contract,
   intervals: BlockInterval[],
   provider: ethers.providers.Provider,
-  store: Store
+  store: Store,
+  signer: ethers.Wallet
 ) {
   // Submissions and removal requests.
   tcr.on(
@@ -25,7 +26,8 @@ export default async function addTCRListeners(
       batchWithdraw,
       intervals,
       provider,
-      store
+      store,
+      signer
     )
   )
 

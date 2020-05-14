@@ -95,7 +95,8 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
       batchWithdraw,
       intervals,
       provider,
-      store
+      store,
+      signer
     )))
 
     gtcrFactory.on(gtcrFactory.filters.NewGTCR(), _address =>
@@ -104,7 +105,8 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
         batchWithdraw,
         intervals,
         provider,
-        store
+        store,
+        signer
       )
     )
 
