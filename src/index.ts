@@ -238,7 +238,11 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
 
       // Take previous block to avoid returning null due to outdated
       // blockchain data.
-      const { timestamp } = await provider.getBlock(blockHeight-1)
+      let block
+      while (!block) { // Sometimes getBlock returns null for some reason. Try again.
+        block = await provider.getBlock(blockHeight-1)
+      }
+      const { timestamp } = block
 
       for (let tcrAddress of Object.keys(dbState)) {
         const tcrWatchList = dbState[tcrAddress]
