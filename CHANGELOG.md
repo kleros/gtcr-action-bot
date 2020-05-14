@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.4](https://github.com/kleros/gtcr-action-bot/compare/v0.1.3...v0.1.4) (2020-05-14)
+
+
+### Bug Fixes
+
+* disputed request should not return but continue ([7c02bcb](https://github.com/kleros/gtcr-action-bot/commit/7c02bcbf09fd30240b3a06c92862ed94c65d413f))
+* handle getBlock returning null ([6987eac](https://github.com/kleros/gtcr-action-bot/commit/6987eac81f891070979643ca7eb4f864bea07a78))
+* handle nonces manually when syncing for the first time ([919c912](https://github.com/kleros/gtcr-action-bot/commit/919c9124d7ab04edff21e0c0ec6dded8681260ed))
+* remove unused parameter and update factory ([c512227](https://github.com/kleros/gtcr-action-bot/commit/c5122278ae63b7da67f07ee2fc8cacc4e1b189e6))
+
 ### [0.1.3](https://github.com/kleros/gtcr-action-bot/compare/v0.1.2...v0.1.3) (2020-04-16)
 
 
