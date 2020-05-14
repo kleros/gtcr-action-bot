@@ -45,10 +45,11 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
     console.info(`Version ${version}`.green)
     console.info('Booting...'.green)
     console.info()
-    const [blockHeight, network, balance] = await Promise.all([
+    const [blockHeight, network, balance, txCount] = await Promise.all([
       provider.getBlockNumber(),
       provider.getNetwork(),
-      signer.getBalance()
+      signer.getBalance(),
+      signer.getTransactionCount()
     ])
 
     const { timestamp, number: currBlock } = await provider.getBlock(blockHeight)
@@ -116,6 +117,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
     console.info(`Detected ${tcrs.length} TCRs`)
     console.info('Scanning them for pending requests and withdrawals...')
     let tcrCount = 1
+    let nonce = txCount + 1
     for (let tcr of tcrs) {
       console.info(`Scanning ${tcrCount} of ${tcrs.length}`)
 
@@ -182,7 +184,10 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           // Challenge period passed with no challenges, execute it.
           console.info(`  Found executable request for item of ID ${_itemID} of TCR at ${tcr.address}` )
           console.info('  Executing it.'.cyan)
-          await tcr.executeRequest(_itemID)
+          await tcr.executeRequest(_itemID, {
+            nonce
+          })
+          nonce++
         } else {
           await store.addToWatchlist(
             tcr.address,
@@ -215,7 +220,8 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           batchWithdraw,
           intervals,
           provider,
-          store
+          store,
+          signer
         )
         resolvedRequestCount++
       }

@@ -9,7 +9,8 @@ export default async function withdrawRewardsRemoveWatchlist(
   batchWithdraw: ethers.Contract,
   blockIntervals: BlockInterval[],
   provider: ethers.providers.Provider,
-  store: Store
+  store: Store,
+  signer: ethers.Wallet
 ) {
   const { disputed } = await tcr.getRequestInfo(itemID, requestID)
   if (!disputed) return // No rewards to withdraw if there was never a dispute.
@@ -29,6 +30,7 @@ export default async function withdrawRewardsRemoveWatchlist(
   // every round by a contributor, we avoid withdrawing
   // for the same contributor more than once by using a set.
   const done = new Set()
+  let nonce = (await signer.getTransactionCount()) + 1
   for (let contributionEvent of contributionEvents) {
     const { values: { _contributor, itemID, _request } } = contributionEvent
     if (done.has(_contributor)) return
@@ -40,9 +42,11 @@ export default async function withdrawRewardsRemoveWatchlist(
       itemID,
       _request,
       0,
-      0
+      0,
+      { nonce }
     )
 
+    nonce++
     done.add(_contributor)
   }
 
