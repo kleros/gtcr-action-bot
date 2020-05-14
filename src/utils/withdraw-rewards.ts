@@ -30,7 +30,7 @@ export default async function withdrawRewardsRemoveWatchlist(
   // every round by a contributor, we avoid withdrawing
   // for the same contributor more than once by using a set.
   const done = new Set()
-  let nonce = (await signer.getTransactionCount()) + 1
+  let nonce = (await signer.getTransactionCount())
   for (let contributionEvent of contributionEvents) {
     const { values: { _contributor, itemID, _request } } = contributionEvent
     if (done.has(_contributor)) return

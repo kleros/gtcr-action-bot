@@ -119,7 +119,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
     console.info(`Detected ${tcrs.length} TCRs`)
     console.info('Scanning them for pending requests and withdrawals...')
     let tcrCount = 1
-    let nonce = txCount + 1
+    let nonce = txCount
     for (let tcr of tcrs) {
       console.info(`Scanning ${tcrCount} of ${tcrs.length}`)
 
