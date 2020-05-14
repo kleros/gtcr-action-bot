@@ -176,7 +176,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
         console.info(` Checking ${pendingRequestCount} of ${pendingRequests.length}`)
         const { values: { _itemID, _requestIndex }} = pendingRequest
         const { submissionTime, disputed } = await tcr.getRequestInfo(_itemID, _requestIndex)
-        if (disputed) return // There is an ongoing dispute. No-op.
+        if (disputed) continue // There is an ongoing dispute. No-op.
 
         if (bigNumberify(timestamp).sub(submissionTime).gt(challengePeriodDuration)) {
           // Challenge period passed with no challenges, execute it.
