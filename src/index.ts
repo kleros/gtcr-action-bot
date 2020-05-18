@@ -121,7 +121,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
     let tcrCount = 1
     let nonce = txCount
     for (let tcr of tcrs) {
-      console.info(`Scanning ${tcrCount} of ${tcrs.length}`)
+      console.info(`Scanning ${tcrCount} of ${tcrs.length} (${tcr.address})`)
 
       // To get all pending and resolved requests efficiently, we use
       // the GeneralizedTCR.RequestSubmitted and
@@ -138,8 +138,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           (await Promise.all(
             intervals.map(async interval => provider.getLogs({
               ...tcr.filters.RequestSubmitted(),
-              fromBlock: interval.fromBlock,
-              toBlock: interval.toBlock,
+              ...interval
             }))
           ))
           .reduce((acc, curr) => [...acc, ...curr])
@@ -148,8 +147,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           (await Promise.all(
             intervals.map(async interval => provider.getLogs({
               ...tcr.filters.ItemStatusChange(),
-              fromBlock: interval.fromBlock,
-              toBlock: interval.toBlock,
+              ...interval
             }))
           ))
           .reduce((acc, curr) => [...acc, ...curr])
@@ -163,10 +161,10 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
       // emitted with the _resolved field set to true.
       const pendingRequests = requestSubmittedEvents
         .filter(
-          ({ values: { _itemID, _requestID}}) =>
+          ({ values: { _itemID, _requestIndex }}) =>
             !itemStatusChangeEvents.find(
               ({ values }) => values._itemID === _itemID
-                && values._requestID === _requestID
+                && values._requestIndex.eq(_requestIndex)
                 && values._resolved
             )
         )
