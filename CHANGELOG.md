@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.7](https://github.com/kleros/gtcr-action-bot/compare/v0.1.6...v0.1.7) (2020-05-18)
+
+
+### Features
+
+* dont withdraw unless there is eth to withdraw ([71b70f8](https://github.com/kleros/gtcr-action-bot/commit/71b70f878a0ecb6b23014a1a23c8c0ec6301a1a2))
+
+
+### Bug Fixes
+
+* items with multiple requests not executing ([6b13d85](https://github.com/kleros/gtcr-action-bot/commit/6b13d851b676fa1d03732ff304d80a242e5b69a3))
+* missing block interval ([3eec8a0](https://github.com/kleros/gtcr-action-bot/commit/3eec8a07b971e7a05805870c5f1065caa6483eaf))
+
 ### [0.1.6](https://github.com/kleros/gtcr-action-bot/compare/v0.1.5...v0.1.6) (2020-05-14)
 
 

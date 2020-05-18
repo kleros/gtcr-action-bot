@@ -1,6 +1,6 @@
 {
   "name": "gtcr-action-bot",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A bot to watch GTCR contract and call functions on behalf of users",
   "main": "src/index.js",
   "scripts": {
