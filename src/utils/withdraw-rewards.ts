@@ -1,6 +1,7 @@
 import { ethers } from "ethers"
-import { BigNumber } from "ethers/utils"
+import { BigNumber, bigNumberify } from "ethers/utils"
 import Store from "./store"
+import { PARTY } from "../types/enums"
 
 export default async function withdrawRewardsRemoveWatchlist(
   itemID: string,
@@ -32,9 +33,13 @@ export default async function withdrawRewardsRemoveWatchlist(
   // for the same contributor more than once by using a set.
   const done = new Set()
   let nonce = (await signer.getTransactionCount())
+  let withdrewRewards
   for (let contributionEvent of contributionEvents) {
-    const { values: { _contributor, itemID, _request } } = contributionEvent
+    const { values: { _contributor, _request, _round, _itemID } } = contributionEvent
     if (done.has(_contributor)) return
+
+    const contributions = await tcr.getContributions(_itemID, _request, _round, _contributor)
+    if (contributions[PARTY.REQUESTER].eq(bigNumberify(0)) && contributions[PARTY.CHALLENGER].eq(bigNumberify(0))) continue
 
     console.info(` Withdrawing ${_contributor} rewards for item ${itemID} of TCR at ${tcr.address}`.cyan)
     await batchWithdraw.batchRoundWithdraw(
@@ -46,11 +51,13 @@ export default async function withdrawRewardsRemoveWatchlist(
       0,
       { nonce }
     )
+    withdrewRewards = true
 
     nonce++
     done.add(_contributor)
   }
 
   await store.removeFromWatchlist(tcr.address, itemID)
-  console.info(` Removed item ${itemID} of TCR at ${tcr.address} from watchlist.`.cyan)
+  if (withdrewRewards)
+    console.info(` Removed item ${itemID} of TCR at ${tcr.address} from watchlist.`.cyan)
 }
