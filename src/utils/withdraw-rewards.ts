@@ -18,6 +18,7 @@ export default async function withdrawRewardsRemoveWatchlist(
   const contributionEvents = (await Promise.all(
     blockIntervals.map(async interval => provider.getLogs({
       ...tcr.filters.AppealContribution(itemID, null, requestID),
+      ...interval
     }))
   ))
     .reduce((acc, curr) => [...acc, ...curr])
