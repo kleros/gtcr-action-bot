@@ -72,7 +72,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
     // Fetch the addresses of TCRs deployed with this factory and
     // instantiate tcrs.
     // We fetch events in batches to avoid timeouts by the provider.
-    const intervals = await getSweepIntervals(
+    const intervals = getSweepIntervals(
       deploymentBlock,
       currBlock,
       blocksPerRequest
@@ -177,10 +177,11 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
       for (let pendingRequest of pendingRequests) {
         console.info(` Checking ${pendingRequestCount} of ${pendingRequests.length}`)
         const { values: { _itemID, _requestIndex }} = pendingRequest
-        const { submissionTime, disputed } = await tcr.getRequestInfo(_itemID, _requestIndex)
+        const { submissionTime, disputed, resolved } = await tcr.getRequestInfo(_itemID, _requestIndex)
         if (disputed) continue // There is an ongoing dispute. No-op.
+        if (resolved) continue // Someone already executed it.
 
-        if (bigNumberify(timestamp).sub(submissionTime).gt(challengePeriodDuration)) {
+        if (bigNumberify(timestamp).sub(submissionTime).gt(challengePeriodDuration) ) {
           // Challenge period passed with no challenges, execute it.
           console.info(`  Found executable request for item of ID ${_itemID} of TCR at ${tcr.address}` )
           console.info('  Executing it.'.cyan)
@@ -254,16 +255,29 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
         const tcrWatchList = dbState[tcrAddress]
         for (let itemID of Object.keys(tcrWatchList)) {
           const challengePeriodEnd = dbState[tcrAddress][itemID]
-          if (timestamp < Number(challengePeriodEnd)) return
+          if (!!challengePeriodEnd && timestamp < Number(challengePeriodEnd)) return
 
           console.info()
-          console.info(`Found executable request for item of ID ${itemID} of TCR at ${tcrAddress}` )
-          console.info('Executing it.'.cyan)
-          try {
-            await new ethers.Contract(tcrAddress, _GeneralizedTCR.abi, signer).executeRequest(itemID)
-          } catch (err) {
-            console.warn(`Failed to request for item of ID ${itemID} of TCR at ${tcrAddress}` )
-            console.warn('Reason:', err)
+          console.info(`Found request that passed teh challenge period:` )
+          console.info(`Item of ID ${itemID} of TCR at ${tcrAddress}`)
+          console.info('Checking if it is resolved...'.cyan)
+          const tcr = new ethers.Contract(tcrAddress, _GeneralizedTCR.abi, signer)
+          const { numberOfRequests } = await tcr.getItem(itemID)
+          const requestID = numberOfRequests.toNumber() - 1
+          const { resolved } = await tcr.getRequest(itemID, requestID)
+          console.info(`Resolved: ${resolved}`)          
+
+          if (!resolved) {
+            console.info('Executing it...')
+            try {
+              await tcr.executeRequest(itemID)
+              console.info('Done.')
+            } catch (err) {
+              console.warn(`Failed to execute request for item of ID ${itemID} of TCR at ${tcrAddress}` )
+              console.warn('Reason:', err)
+            }
+          } else {
+            await store.removeFromWatchlist(tcrAddress, itemID)
           }
         }
       }
