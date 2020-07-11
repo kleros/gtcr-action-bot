@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.9](https://github.com/kleros/gtcr-action-bot/compare/v0.1.8...v0.1.9) (2020-07-11)
+
+
+### Bug Fixes
+
+* incorrect method call signature ([2f2f18f](https://github.com/kleros/gtcr-action-bot/commit/2f2f18f47e6d88b4ecf069977e74a3347f5f39ec))
+* method call signature ([538a8bb](https://github.com/kleros/gtcr-action-bot/commit/538a8bb54716c925e80b6d2d8547eafebf11e9f4))
+
 ### [0.1.8](https://github.com/kleros/gtcr-action-bot/compare/v0.1.7...v0.1.8) (2020-07-11)
 
 
