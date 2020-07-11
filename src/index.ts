@@ -262,7 +262,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           console.info(`Item of ID ${itemID} of TCR at ${tcrAddress}`)
           console.info('Checking if it is resolved...'.cyan)
           const tcr = new ethers.Contract(tcrAddress, _GeneralizedTCR.abi, signer)
-          const { numberOfRequests } = await tcr.getItem(itemID)
+          const { numberOfRequests } = await tcr.getItemInfo(itemID)
           const requestID = numberOfRequests.toNumber() - 1
           const { resolved } = await tcr.getRequest(itemID, requestID)
           console.info(`Resolved: ${resolved}`)          
