@@ -264,10 +264,10 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           const tcr = new ethers.Contract(tcrAddress, _GeneralizedTCR.abi, signer)
           const { numberOfRequests } = await tcr.getItemInfo(itemID)
           const requestID = numberOfRequests.toNumber() - 1
-          const { resolved } = await tcr.getRequestInfo(itemID, requestID)
-          console.info(`Resolved: ${resolved}`)          
+          const { resolved, disputed } = await tcr.getRequestInfo(itemID, requestID)
+          console.info(`Disputed: ${disputed} Resolved: ${resolved}`)          
 
-          if (!resolved) {
+          if (!disputed && !resolved) {
             console.info('Executing it...')
             try {
               await tcr.executeRequest(itemID)
