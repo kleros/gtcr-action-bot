@@ -26,6 +26,34 @@ This bot watches a GTCR Factory contract and all GTCR contracts spawned from it.
 
 > To start with PM2 use `pm2 start yarn --interpreter bash --name gtcr-action-bot -- production`
 
+## Debugging
+
+If developing in VS Code/Codium, you can use this `.vscode/launch.json` file for debugging:
+
+```
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program",
+      "preLaunchTask": "${defaultBuildTask}",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/dist",
+      "outFiles": [
+        "${workspaceFolder}/**/*.js"
+      ]
+    }
+  ]
+}
+```
+
 ## Other Scripts
 
 - `yarn format` - Lint, fix and prettify all the project.
