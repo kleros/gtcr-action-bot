@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0](https://github.com/kleros/gtcr-action-bot/compare/v0.1.9...v1.0.0) (2020-07-17)
+
+
+### Bug Fixes
+
+* missing dispute check before execution ([79a9d5e](https://github.com/kleros/gtcr-action-bot/commit/79a9d5e32c97d298d985bea6edb739c7123e3b58))
+
 ### [0.1.9](https://github.com/kleros/gtcr-action-bot/compare/v0.1.8...v0.1.9) (2020-07-11)
 
 
