@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1](https://github.com/kleros/gtcr-action-bot/compare/v0.1.9...v1.0.1) (2020-07-21)
+
+
+### Bug Fixes
+
+* increase verbosity and continue instead of returning ([3451cdf](https://github.com/kleros/gtcr-action-bot/commit/3451cdf697990a9c92be9fe3e8ef62bd0aedb830))
+* missing dispute check before execution ([d97f240](https://github.com/kleros/gtcr-action-bot/commit/d97f240eb6b0f0e05fe3b2c3695bcb9e1e72c580))
+* typo and increase default poll time ([baaea4e](https://github.com/kleros/gtcr-action-bot/commit/baaea4ec213d300277ce0e1ee6e073db4f05185d))
+
 ## [1.0.0](https://github.com/kleros/gtcr-action-bot/compare/v0.1.9...v1.0.0) (2020-07-17)
 
 
