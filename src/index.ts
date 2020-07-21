@@ -238,6 +238,8 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
     // if any submissions entered the request exectution period
     // (aka finished the challenge period.)
     setInterval(async function watcher() {
+      console.info()
+      console.info(`Checking for executable items, ${new Date().toUTCString()}`)
       const [dbState, blockHeight] = await Promise.all([
         store.getDB(),
         provider.getBlockNumber()
@@ -251,11 +253,21 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
       }
       const { timestamp } = block
 
+      console.info(`${Object.keys(dbState).length} TCRs to go through`)
+      let i = 1
       for (let tcrAddress of Object.keys(dbState)) {
         const tcrWatchList = dbState[tcrAddress]
+        console.info(`${i} of ${Object.keys(dbState).length}`)
+        console.info(`  ${Object.keys(tcrWatchList).length} items in the watchlist`)
+        i++
+
+        let j = 1
         for (let itemID of Object.keys(tcrWatchList)) {
+          console.info(`  ${j} of ${Object.keys(tcrWatchList).length}`)
+          j++
+          
           const challengePeriodEnd = dbState[tcrAddress][itemID]
-          if (!!challengePeriodEnd && timestamp < Number(challengePeriodEnd)) return
+          if (!!challengePeriodEnd && timestamp < Number(challengePeriodEnd)) continue
 
           console.info()
           console.info(`Found request that passed the challenge period:` )
@@ -277,8 +289,9 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
               console.warn('Reason:', err)
             }
           } else {
+            console.info('Removing from watch list.')
             await store.removeFromWatchlist(tcrAddress, itemID)
-          }
+          }          
         }
       }
     }, Number(process.env.POLL_PERIOD_MINUTES) * 60 * 1000)
