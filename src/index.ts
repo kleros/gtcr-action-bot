@@ -258,7 +258,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           if (!!challengePeriodEnd && timestamp < Number(challengePeriodEnd)) return
 
           console.info()
-          console.info(`Found request that passed teh challenge period:` )
+          console.info(`Found request that passed the challenge period:` )
           console.info(`Item of ID ${itemID} of TCR at ${tcrAddress}`)
           console.info('Checking if it is resolved...'.cyan)
           const tcr = new ethers.Contract(tcrAddress, _GeneralizedTCR.abi, signer)
