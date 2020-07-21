@@ -176,6 +176,8 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
       let pendingRequestCount = 1
       for (let pendingRequest of pendingRequests) {
         console.info(` Checking ${pendingRequestCount} of ${pendingRequests.length}`)
+        pendingRequestCount++
+        
         const { values: { _itemID, _requestIndex }} = pendingRequest
         const { submissionTime, disputed, resolved } = await tcr.getRequestInfo(_itemID, _requestIndex)
         if (disputed) continue // There is an ongoing dispute. No-op.
@@ -198,7 +200,6 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           console.info(`  Found item ${_itemID} of TCR at ${tcr.address} in the challenge period.` )
           console.info('  Added it to the watchlist.'.cyan)
         }
-        pendingRequestCount++
       }
 
       // We use the pending requests calculated previously
