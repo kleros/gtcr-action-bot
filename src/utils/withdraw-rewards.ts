@@ -1,5 +1,5 @@
 import { ethers } from "ethers"
-import { BigNumber, bigNumberify } from "ethers/utils"
+import { BigNumber, bigNumberify, formatEther } from "ethers/utils"
 import Store from "./store"
 import { PARTY } from "../types/enums"
 
@@ -39,7 +39,11 @@ export default async function withdrawRewardsRemoveWatchlist(
     if (done.has(_contributor)) return
 
     const contributions = await tcr.getContributions(_itemID, _request, _round, _contributor)
-    if (contributions[PARTY.REQUESTER].eq(bigNumberify(0)) && contributions[PARTY.CHALLENGER].eq(bigNumberify(0))) continue
+    if (contributions[PARTY.REQUESTER].eq(bigNumberify(0)) && contributions[PARTY.CHALLENGER].eq(bigNumberify(0))) {
+      continue
+    } else {
+      console.info(`${_contributor} contributions: requester ${formatEther(contributions[PARTY.REQUESTER])}, challenger ${formatEther(contributions[PARTY.REQUESTER])}`)
+    }
 
     console.info(` Withdrawing ${_contributor} rewards for item ${itemID} of TCR at ${tcr.address}`.cyan)
     await batchWithdraw.batchRoundWithdraw(

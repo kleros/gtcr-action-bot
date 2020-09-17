@@ -177,7 +177,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
       for (let pendingRequest of pendingRequests) {
         console.info(` Checking ${pendingRequestCount} of ${pendingRequests.length}`)
         pendingRequestCount++
-        
+
         const { values: { _itemID, _requestIndex }} = pendingRequest
         const { submissionTime, disputed, resolved } = await tcr.getRequestInfo(_itemID, _requestIndex)
         if (disputed) continue // There is an ongoing dispute. No-op.
@@ -266,7 +266,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
         for (let itemID of Object.keys(tcrWatchList)) {
           console.info(`  ${j} of ${Object.keys(tcrWatchList).length}`)
           j++
-          
+
           const challengePeriodEnd = dbState[tcrAddress][itemID]
           if (!!challengePeriodEnd && timestamp < Number(challengePeriodEnd)) continue
 
@@ -278,7 +278,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           const { numberOfRequests } = await tcr.getItemInfo(itemID)
           const requestID = numberOfRequests.toNumber() - 1
           const { resolved, disputed } = await tcr.getRequestInfo(itemID, requestID)
-          console.info(`Disputed: ${disputed} Resolved: ${resolved}`)          
+          console.info(`Disputed: ${disputed} Resolved: ${resolved}`)
 
           if (!disputed && !resolved) {
             console.info('Executing it...')
@@ -292,7 +292,7 @@ const deploymentBlock = Number(process.env.FACTORY_BLOCK_NUM) || 0
           } else {
             console.info('Removing from watch list.')
             await store.removeFromWatchlist(tcrAddress, itemID)
-          }          
+          }
         }
       }
     }, Number(process.env.POLL_PERIOD_MINUTES) * 60 * 1000)
