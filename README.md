@@ -9,6 +9,7 @@
 </p>
 
 This bot watches a GTCR Factory contract and all GTCR contracts spawned from it. It is a convenience tool and does primarily two things:
+
 - Detects submissions that passed the challenge period and executes them for the user.
 - Detects pending crowdfunding rewards that were not withdrawn, and withdraws them for the user.
 
@@ -20,11 +21,9 @@ This bot watches a GTCR Factory contract and all GTCR contracts spawned from it.
 
 1.  Clone this repo.
 2.  Duplicate `.env.example`, rename it to `.env` and fill in the environment variables.
-3.  Run `yarn` to install dependencies and then `yarn start` to run the service in development mode.
+3.  Run `npm i` to install dependencies and then `npm run start` to run the service
 
-> To run the service in production mode use `yarn production`.
-
-> To start with PM2 use `pm2 start yarn --interpreter bash --name gtcr-action-bot -- production`
+> To start with PM2 use `pm2 start npm --interpreter bash --name gtcr-action-bot -- start`
 
 ## Debugging
 
@@ -32,23 +31,15 @@ If developing in VS Code/Codium, you can use this `.vscode/launch.json` file for
 
 ```
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "preLaunchTask": "${defaultBuildTask}",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "program": "${workspaceFolder}/dist",
-      "outFiles": [
-        "${workspaceFolder}/**/*.js"
-      ]
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "program": "${workspaceFolder}/src/index.ts",
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     }
   ]
 }
@@ -57,7 +48,7 @@ If developing in VS Code/Codium, you can use this `.vscode/launch.json` file for
 ## Other Scripts
 
 - `yarn format` - Lint, fix and prettify all the project.
-.js files with styled components and .js files.
+  .js files with styled components and .js files.
 - `yarn run cz` - Run commitizen.
 
 ## Contributing

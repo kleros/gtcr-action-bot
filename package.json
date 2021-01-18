@@ -4,11 +4,10 @@
   "description": "A bot to watch GTCR contract and call functions on behalf of users",
   "main": "src/index.js",
   "scripts": {
-    "start": "ts-node-dev src/index.ts",
+    "start": "npm run build && node dist",
     "build": "rimraf dist && tsc",
-    "production": "yarn build && node dist",
     "lint:secrets": "secretlint \"**/*\"",
-    "lint": "yarn lint:secrets",
+    "lint": "npm run lint:secrets",
     "cleanDB": "rimraf ./db/* && nodetouch ./db/.gitkeep",
     "release": "standard-version"
   },
@@ -62,8 +61,11 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn lint",
+      "pre-commit": "npm run lint",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
+  },
+  "volta": {
+    "node": "10.23.1"
   }
 }
