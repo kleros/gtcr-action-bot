@@ -21,35 +21,8 @@ This bot watches a GTCR Factory contract and all GTCR contracts spawned from it.
 
 1.  Clone this repo.
 2.  Duplicate `.env.example`, rename it to `.env` and fill in the environment variables.
-3.  Run `npm i` to install dependencies and then `npm run start` to run the service
+3.  Run `yarn` to install dependencies and then `yarn start` to run the service
 
-> To start with PM2 use `pm2 start npm --name gtcr-action-bot -- start`
-
-## Debugging
-
-If developing in VS Code/Codium, you can use this `.vscode/launch.json` file for debugging:
-
-```
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch Program",
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "program": "${workspaceFolder}/src/index.ts",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
-    }
-  ]
-}
-```
-
-## Other Scripts
-
-- `npm run format` - Lint, fix and prettify all the project.
-  .js files with styled components and .js files.
-- `npm run cz` - Run commitizen.
 
 ## Contributing
 
