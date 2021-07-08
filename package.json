@@ -4,8 +4,10 @@
   "description": "A bot to watch GTCR contract and call functions on behalf of users",
   "main": "src/index.js",
   "scripts": {
-    "start": "npm run build && node dist",
-    "build": "rimraf dist && tsc",
+    "start": "env-cmd -f ./.env ts-node --files -r dotenv-safe/config ./src/index.ts",
+    "start:mainnet": "env-cmd -f ./.env.mainnet ts-node --files -r dotenv-safe/config ./src/index.ts",
+    "start:xdai": "env-cmd -f ./.env.xdai ts-node --files -r dotenv-safe/config ./src/index.ts",
+    "start:rinkeby": "env-cmd -f ./.env.rinkeby ts-node --files -r dotenv-safe/config ./src/index.ts",
     "lint:secrets": "secretlint \"**/*\"",
     "lint": "npm run lint:secrets",
     "cleanDB": "rimraf ./db/* && nodetouch ./db/.gitkeep",
@@ -37,12 +39,14 @@
     "@types/express": "^4.17.6",
     "@types/morgan": "^1.9.0",
     "@types/node": "^13.11.1",
+    "dotenv-safe": "^8.2.0",
+    "env-cmd": "^10.1.0",
     "husky": "^4.2.3",
     "rimraf": "^3.0.2",
     "secretlint": "^1.0.1",
     "standard-version": "^8.0.1",
     "touch": "^3.1.0",
-    "ts-node-dev": "^1.0.0-pre.44",
+    "ts-node": "^10.0.0",
     "typescript": "^3.8.3"
   },
   "standard": {
@@ -66,6 +70,7 @@
     }
   },
   "volta": {
-    "node": "10.23.1"
+    "node": "14.17.3",
+    "yarn": "1.22.10"
   }
 }
