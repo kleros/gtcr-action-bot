@@ -64,8 +64,7 @@ typings/
 .next
 
 # application key value store
-db/*
-!db/.gitkeep
+db-*
 
 # encryption keys
 key/*.pem

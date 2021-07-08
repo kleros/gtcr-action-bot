@@ -1,6 +1,5 @@
 import { ethers } from "ethers"
 import { BigNumber } from "ethers/utils"
-import { DB_KEY } from "../utils/db"
 import Store from "../utils/store"
 
 /**

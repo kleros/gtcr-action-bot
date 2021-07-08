@@ -15,7 +15,9 @@ This bot watches a GTCR Factory contract and all GTCR contracts spawned from it.
 
 ## Prerequisites
 
-- Tested on NodeJS version 11
+We recommend using [volta](https://volta.sh/)
+
+- Tested on NodeJS version 14.
 
 ## Get Started
 
@@ -23,6 +25,14 @@ This bot watches a GTCR Factory contract and all GTCR contracts spawned from it.
 2.  Duplicate `.env.example`, rename it to `.env` and fill in the environment variables.
 3.  Run `yarn` to install dependencies and then `yarn start` to run the service
 
+## Production
+
+1. Create a `.env` file with the name of the network you wish to use. Example `.env.xdai`.
+2. Look into `package.json` for the appropriate script (e.g. start:xdai). Create one if it does not yet exist.
+3. Use PM2 like so: `pm2 start yarn --interpreter bash --name gtcr-action-bot-<network> -- start:<network>`, replacing `network` with the network name.
+
+Example for xDai:
+`pm2 start yarn --interpreter bash --name gab-xdai -- start:xdai`
 
 ## Contributing
 
