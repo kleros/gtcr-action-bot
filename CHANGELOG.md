@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/kleros/gtcr-action-bot/compare/v0.1.9...v1.1.0) (2021-07-08)
+
+
+### Features
+
+* support multiple networks by env files ([c570d3e](https://github.com/kleros/gtcr-action-bot/commit/c570d3e8c70258d73eb255fc7e530bc38fdeb88b))
+
+
+### Bug Fixes
+
+* increase verbosity and continue instead of returning ([3451cdf](https://github.com/kleros/gtcr-action-bot/commit/3451cdf697990a9c92be9fe3e8ef62bd0aedb830))
+* missing counter increase on some paths ([9157621](https://github.com/kleros/gtcr-action-bot/commit/9157621732b39f0244213c421ce89235ac478af5))
+* missing dispute check before execution ([d97f240](https://github.com/kleros/gtcr-action-bot/commit/d97f240eb6b0f0e05fe3b2c3695bcb9e1e72c580))
+* pin node version, remove yarn and update README ([e6c05c2](https://github.com/kleros/gtcr-action-bot/commit/e6c05c28a69599b5e51a458ac333f6a5525d41ab))
+* typo and increase default poll time ([baaea4e](https://github.com/kleros/gtcr-action-bot/commit/baaea4ec213d300277ce0e1ee6e073db4f05185d))
+
 ### [1.0.1](https://github.com/kleros/gtcr-action-bot/compare/v0.1.9...v1.0.1) (2020-07-21)
 
 
