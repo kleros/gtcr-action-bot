@@ -60,9 +60,6 @@ typings/
 .env.*
 !.env.example
 
-# next.js build output
-.next
-
 # application key value store
 db-*
 
