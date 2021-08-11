@@ -1,5 +1,4 @@
-import { BigNumber } from "ethers/utils"
-import { ethers } from "ethers"
+import { BigNumber, ethers } from "ethers"
 import withdrawRewardsRemoveWatchlist from "../utils/withdraw-rewards"
 import Store from "../utils/store"
 

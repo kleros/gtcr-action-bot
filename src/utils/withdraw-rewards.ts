@@ -1,5 +1,6 @@
-import { ethers } from "ethers"
-import { BigNumber, bigNumberify, formatEther } from "ethers/utils"
+import { BigNumber, ethers } from "ethers"
+import { formatEther } from "ethers/lib/utils"
+
 import Store from "./store"
 import { PARTY } from "../types/enums"
 
@@ -24,7 +25,7 @@ export default async function withdrawRewardsRemoveWatchlist(
   ))
     .reduce((acc, curr) => [...acc, ...curr])
     .map(rawEvent => tcr.interface.parseLog(rawEvent))
-    .filter(({ values: { _round } }) => _round.toNumber() !== 0) // Ignore first round
+    .filter(({ args: { _round } }) => _round.toNumber() !== 0) // Ignore first round
 
   // A new AppealContribution event is emmited every time
   // someone makes a contribution.
@@ -35,11 +36,11 @@ export default async function withdrawRewardsRemoveWatchlist(
   let nonce = (await signer.getTransactionCount())
   let withdrewRewards
   for (let contributionEvent of contributionEvents) {
-    const { values: { _contributor, _request, _round, _itemID } } = contributionEvent
+    const { args: { _contributor, _request, _round, _itemID } } = contributionEvent
     if (done.has(_contributor)) return
 
     const contributions = await tcr.getContributions(_itemID, _request, _round, _contributor)
-    if (contributions[PARTY.REQUESTER].eq(bigNumberify(0)) && contributions[PARTY.CHALLENGER].eq(bigNumberify(0))) {
+    if (contributions[PARTY.REQUESTER].eq(BigNumber.from(0)) && contributions[PARTY.CHALLENGER].eq(BigNumber.from(0))) {
       continue
     } else {
       console.info(`${_contributor} contributions: requester ${formatEther(contributions[PARTY.REQUESTER])}, challenger ${formatEther(contributions[PARTY.REQUESTER])}`)

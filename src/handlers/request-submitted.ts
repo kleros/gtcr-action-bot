@@ -1,5 +1,4 @@
-import { ethers } from "ethers"
-import { BigNumber } from "ethers/utils"
+import { BigNumber, ethers } from "ethers"
 import Store from "../utils/store"
 
 /**

@@ -1,5 +1,5 @@
-import { ethers } from 'ethers'
-import { bigNumberify, formatEther } from 'ethers/utils'
+import { BigNumber, ethers } from 'ethers'
+import { formatEther } from 'ethers/lib/utils'
 import level from 'level'
 import 'colors'
 import fs from 'fs'
@@ -84,7 +84,7 @@ async function main() {
   ))
     .reduce((acc, curr) => [...acc, ...curr])
     .map(rawEvent => gtcrFactory.interface.parseLog(rawEvent))
-    .map(({ values: { _address } }) => new ethers.Contract(_address, _GeneralizedTCR.abi, signer))
+    .map(({ args: { _address } }) => new ethers.Contract(_address, _GeneralizedTCR.abi, signer))
 
   // Add listeners for events emitted by the TCRs and
   // do the same for new TCRs created while the bot is running.
@@ -159,11 +159,11 @@ async function main() {
     // emitted with the _resolved field set to true.
     const pendingRequests = requestSubmittedEvents
       .filter(
-        ({ values: { _itemID, _requestIndex }}) =>
+        ({ args: { _itemID, _requestIndex }}) =>
           !itemStatusChangeEvents.find(
-            ({ values }) => values._itemID === _itemID
-              && values._requestIndex.eq(_requestIndex)
-              && values._resolved
+            ({ args }) => args._itemID === _itemID
+              && args._requestIndex.eq(_requestIndex)
+              && args._resolved
           )
       )
 
@@ -176,12 +176,12 @@ async function main() {
       console.info(` Checking ${pendingRequestCount} of ${pendingRequests.length}`)
       pendingRequestCount++
 
-      const { values: { _itemID, _requestIndex }} = pendingRequest
+      const { args: { _itemID, _requestIndex }} = pendingRequest
       const { submissionTime, disputed, resolved } = await tcr.getRequestInfo(_itemID, _requestIndex)
       if (disputed) continue // There is an ongoing dispute. No-op.
       if (resolved) continue // Someone already executed it.
 
-      if (bigNumberify(timestamp).sub(submissionTime).gt(challengePeriodDuration) ) {
+      if (BigNumber.from(timestamp).sub(submissionTime).gt(challengePeriodDuration) ) {
         // Challenge period passed with no challenges, execute it.
         console.info(`  Found executable request for item of ID ${_itemID} of TCR at ${tcr.address}` )
         console.info('  Executing it.'.cyan)
@@ -212,7 +212,7 @@ async function main() {
     let resolvedRequestCount = 1
     for (let resolvedRequest of resolvedRequests) {
       console.info(` Checking ${resolvedRequestCount} of ${resolvedRequests.length}`)
-      const { values: {_itemID, _requestIndex }} = resolvedRequest
+      const { args: {_itemID, _requestIndex }} = resolvedRequest
       await withdrawRewardsRemoveWatchlist(
         _itemID,
         _requestIndex,
