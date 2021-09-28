@@ -4,11 +4,11 @@ import level from 'level'
 import 'colors'
 import fs from 'fs'
 
-import _GTCRFactory from '@kleros/tcr/build/contracts/GTCRFactory.json'
-import _GeneralizedTCR from '@kleros/tcr/build/contracts/GeneralizedTCR.json'
-import _BatchWidthdraw from '@kleros/tcr/build/contracts/BatchWithdraw.json'
+import _GTCRFactory from './assets/GTCRFactory.json'
+import _GeneralizedTCR from './assets/GeneralizedTCR.json'
+import _BatchWidthdraw from './assets/BatchWithdraw.json'
 
-import addTCRListeners from './handlers'
+import { addTCRListeners } from './handlers'
 import getSweepIntervals from './utils/get-intervals'
 import withdrawRewardsRemoveWatchlist from './utils/withdraw-rewards'
 import Store from './utils/store'
@@ -27,12 +27,12 @@ async function main() {
 
   const gtcrFactory = new ethers.Contract(
     process.env.FACTORY_ADDRESS as string,
-    _GTCRFactory.abi,
+    _GTCRFactory,
     signer
   )
   const batchWithdraw = new ethers.Contract(
     process.env.BATCH_WITHDRAW_ADDRESS as string,
-    _BatchWidthdraw.abi,
+    _BatchWidthdraw,
     signer
   )
 
@@ -84,7 +84,7 @@ async function main() {
   ))
     .reduce((acc, curr) => [...acc, ...curr])
     .map(rawEvent => gtcrFactory.interface.parseLog(rawEvent))
-    .map(({ args: { _address } }) => new ethers.Contract(_address, _GeneralizedTCR.abi, signer))
+    .map(({ args: { _address } }) => new ethers.Contract(_address, _GeneralizedTCR, signer))
 
   // Add listeners for events emitted by the TCRs and
   // do the same for new TCRs created while the bot is running.
@@ -99,7 +99,7 @@ async function main() {
 
   gtcrFactory.on(gtcrFactory.filters.NewGTCR(), _address =>
     addTCRListeners(
-      new ethers.Contract(_address, _GeneralizedTCR.abi, signer),
+      new ethers.Contract(_address, _GeneralizedTCR, signer),
       batchWithdraw,
       intervals,
       provider,
@@ -272,7 +272,7 @@ async function main() {
         console.info(`Found request that passed the challenge period:` )
         console.info(`Item of ID ${itemID} of TCR at ${tcrAddress}`)
         console.info('Checking if it is resolved...'.cyan)
-        const tcr = new ethers.Contract(tcrAddress, _GeneralizedTCR.abi, signer)
+        const tcr = new ethers.Contract(tcrAddress, _GeneralizedTCR, signer)
         const { numberOfRequests } = await tcr.getItemInfo(itemID)
         const requestID = numberOfRequests.toNumber() - 1
         const { resolved, disputed } = await tcr.getRequestInfo(itemID, requestID)

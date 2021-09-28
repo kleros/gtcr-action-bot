@@ -4,7 +4,7 @@ import requestSubmittedHandler from './request-submitted'
 import requestResolvedHandler from './request-resolved'
 import Store from '../utils/store'
 
-export default async function addTCRListeners(
+async function addTCRListeners(
   tcr: ethers.Contract,
   batchWithdraw: ethers.Contract,
   intervals: BlockInterval[],
@@ -33,3 +33,5 @@ export default async function addTCRListeners(
 
   console.info(`Setup listeners for ${tcr.address}`)
 }
+
+export { addTCRListeners }
