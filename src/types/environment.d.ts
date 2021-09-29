@@ -11,6 +11,7 @@ declare global {
       POLL_PERIOD_MINUTES: string,
       LFACTORY_ADDRESS: string,
       LBATCH_WITHDRAW_ADDRESS: string
+      GTCR_SUBGRAPH_URL: string
     }
   }
 }

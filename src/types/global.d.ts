@@ -1,4 +1,5 @@
 declare module 'level'
+declare module 'node-fetch'
 
 interface BlockInterval {
   fromBlock: number
