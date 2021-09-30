@@ -31,13 +31,22 @@ async function run(batchWithdraw: ethers.Contract) {
     } = res;
     console.info(lcontributions);
 
-    // TODO: Extract:
-    // - contributor
-    // - itemID
-    // - requestID
-    // - roundID
-    //
-    // batchWithdraw
+    let withdrawnContribs = new Set<string>();
+    for (let contribution of lcontributions) {
+      const { contributor, id: fullID } = contribution;
+      let address = fullID.slice(fullID.indexOf("@") + 1, fullID.indexOf("-"));
+      let itemID = fullID.slice(0, fullID.indexOf("@"));
+
+      if (withdrawnContribs.has(`${itemID}@${address}`)) continue;
+      withdrawnContribs.add(`${itemID}@${address}`);
+
+      batchWithdraw
+        .batchRequestWithdraw(address, contributor, itemID, 0, 0, 0, 0)
+        .then((tx: any) => console.info(tx))
+        .catch((err: any) =>
+          console.error(`Error withdrawaing values: ${err}`)
+        );
+    }
   } catch (error) {
     console.warn(error);
   }
