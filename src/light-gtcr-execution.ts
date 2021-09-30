@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import fetch from "node-fetch";
+import delay from "delay";
 import "colors";
 
 import _LightGeneralizedTCR from "./assets/LightGeneralizedTCR.json";
@@ -59,7 +60,8 @@ async function run(signer: ethers.Wallet) {
     }
 
     try {
-      tcr.executeRequest(request.item.itemID);
+      await tcr.executeRequest(request.item.itemID);
+      await delay(120 * 1000); // Wait 2 minutes to give time for the chain to sync/nonce handling.
     } catch (error) {
       console.error(
         `Failed to execute request for light curate item ${request.item.itemID}`
