@@ -2,11 +2,9 @@ import { ethers } from "ethers";
 import fetch from "node-fetch";
 import "colors";
 
-import _LightGeneralizedTCR from "./assets/LightGeneralizedTCR.json";
 import _LightBatchWidthdraw from "./assets/LightBatchWithdraw.json";
 
 async function run(batchWithdraw: ethers.Contract) {
-  console.info("Light Curate: Querying...");
   const subgraphQuery = {
     query: `
       {
@@ -18,6 +16,7 @@ async function run(batchWithdraw: ethers.Contract) {
     `,
   };
 
+  let lcontributions;
   try {
     const res = await (
       await fetch(process.env.GTCR_SUBGRAPH_URL, {
@@ -26,29 +25,37 @@ async function run(batchWithdraw: ethers.Contract) {
       })
     ).json();
 
-    const {
-      data: { lcontributions },
-    } = res;
-    console.info(lcontributions);
-
-    let withdrawnContribs = new Set<string>();
-    for (let contribution of lcontributions) {
-      const { contributor, id: fullID } = contribution;
-      let address = fullID.slice(fullID.indexOf("@") + 1, fullID.indexOf("-"));
-      let itemID = fullID.slice(0, fullID.indexOf("@"));
-
-      if (withdrawnContribs.has(`${itemID}@${address}`)) continue;
-      withdrawnContribs.add(`${itemID}@${address}`);
-
-      batchWithdraw
-        .batchRequestWithdraw(address, contributor, itemID, 0, 0, 0, 0)
-        .then((tx: any) => console.info(tx))
-        .catch((err: any) =>
-          console.error(`Error withdrawaing values: ${err}`)
-        );
-    }
+    lcontributions = res.data.lcontributions;
   } catch (error) {
-    console.warn(error);
+    console.error(`Failed to fetch lcontributions`, error);
+    return;
+  }
+
+  let withdrawnContribs = new Set<string>();
+  for (let contribution of lcontributions) {
+    const { contributor, id: fullID } = contribution;
+    let address = fullID.slice(fullID.indexOf("@") + 1, fullID.indexOf("-"));
+    let itemID = fullID.slice(0, fullID.indexOf("@"));
+
+    if (withdrawnContribs.has(`${itemID}@${address}`)) continue;
+    withdrawnContribs.add(`${itemID}@${address}`);
+
+    try {
+      batchWithdraw.batchRequestWithdraw(
+        address,
+        contributor,
+        itemID,
+        0,
+        0,
+        0,
+        0
+      );
+    } catch (error) {
+      console.error(
+        `Failed to withdraw rewards for light curate TCR request. Parameters: address: ${address}, contributor: ${contributor}, itemID: ${itemID}`
+      );
+      console.warn(error);
+    }
   }
 }
 

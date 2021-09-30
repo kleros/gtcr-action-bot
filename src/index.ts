@@ -1,5 +1,7 @@
 import gtcrBot from "./gtcr";
-import lightGTCRBot from "./light-gtcr";
+import lightGTCRExecuteBot from "./light-gtcr-execution";
+import lightGTCRWithdrawBot from "./light-gtcr-withdrawal";
 
 // gtcrBot();
-lightGTCRBot();
+// lightGTCRWithdrawBot();
+lightGTCRExecuteBot();
