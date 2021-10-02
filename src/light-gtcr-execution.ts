@@ -23,17 +23,19 @@ async function run(signer: ethers.Wallet) {
   };
 
   let lrequests;
+  let response;
   try {
-    const res = await (
-      await fetch(process.env.GTCR_SUBGRAPH_URL, {
-        method: "POST",
-        body: JSON.stringify(subgraphQuery),
-      })
-    ).json();
+    response = await fetch(process.env.GTCR_SUBGRAPH_URL, {
+      method: "POST",
+      body: JSON.stringify(subgraphQuery),
+    });
 
-    lrequests = res.data.lrequests;
+    const parsed = await response.json();
+
+    lrequests = parsed.data.lrequests;
   } catch (error) {
     console.error(`Failed to fetch lcontributions`, error);
+    console.error(`Response`, response);
     return;
   }
 

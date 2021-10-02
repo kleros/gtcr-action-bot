@@ -17,17 +17,19 @@ async function run(batchWithdraw: ethers.Contract, signer: ethers.Wallet) {
   };
 
   let lcontributions;
+  let response;
   try {
-    const res = await (
-      await fetch(process.env.GTCR_SUBGRAPH_URL, {
-        method: "POST",
-        body: JSON.stringify(subgraphQuery),
-      })
-    ).json();
+    response = await fetch(process.env.GTCR_SUBGRAPH_URL, {
+      method: "POST",
+      body: JSON.stringify(subgraphQuery),
+    });
 
-    lcontributions = res.data.lcontributions;
+    const parsed = await response.json();
+
+    lcontributions = parsed.data.lcontributions;
   } catch (error) {
     console.error(`Failed to fetch lcontributions`, error);
+    console.error(`response`, response);
     return;
   }
 
