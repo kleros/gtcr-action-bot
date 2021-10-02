@@ -61,13 +61,17 @@ async function run(batchWithdraw: ethers.Contract) {
 
 // Start bot.
 export default async function lightGtcrBot() {
-  console.info("Starting light curate bot...");
+  if (!process.env.GTCR_SUBGRAPH_URL || !process.env.LBATCH_WITHDRAW_ADDRESS) {
+    console.warn("No subgraph URL detected. Aborting lightGTCRExecution bot");
+    return;
+  }
+  console.info("Starting light curate withdrawal bot...");
   const provider = new ethers.providers.JsonRpcProvider(
     process.env.PROVIDER_URL
   );
   const signer = new ethers.Wallet(process.env.WALLET_KEY, provider);
   const batchWithdraw = new ethers.Contract(
-    process.env.BATCH_WITHDRAW_ADDRESS as string,
+    process.env.LBATCH_WITHDRAW_ADDRESS as string,
     _LightBatchWidthdraw,
     signer
   );

@@ -72,7 +72,11 @@ async function run(signer: ethers.Wallet) {
 
 // Start bot.
 export default async function lightGTCRExecuteBot() {
-  console.info("Starting light curate bot...");
+  if (!process.env.GTCR_SUBGRAPH_URL) {
+    console.warn("No subgraph URL detected. Aborting lightGTCRExecution bot");
+    return;
+  }
+  console.info("Starting light curate execution bot...");
   const provider = new ethers.providers.JsonRpcProvider(
     process.env.PROVIDER_URL
   );
