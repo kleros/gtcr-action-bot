@@ -44,6 +44,13 @@ async function run(signer: ethers.Wallet) {
       _LightGeneralizedTCR,
       signer
     );
+    let nonce;
+    try {
+      nonce = await signer.getTransactionCount();
+    } catch (error) {
+      console.error(`Error fetching nonce`);
+      return;
+    }
     try {
       challengePeriodDuration = Number(await tcr.challengePeriodDuration());
     } catch (error) {
@@ -60,7 +67,7 @@ async function run(signer: ethers.Wallet) {
     }
 
     try {
-      await tcr.executeRequest(request.item.itemID);
+      await tcr.executeRequest(request.item.itemID, { nonce });
       await delay(120 * 1000); // Wait 2 minutes to give time for the chain to sync/nonce handling.
     } catch (error) {
       console.error(

@@ -4,7 +4,7 @@ import "colors";
 
 import _LightBatchWidthdraw from "./assets/LightBatchWithdraw.json";
 
-async function run(batchWithdraw: ethers.Contract) {
+async function run(batchWithdraw: ethers.Contract, signer: ethers.Wallet) {
   const subgraphQuery = {
     query: `
       {
@@ -39,6 +39,7 @@ async function run(batchWithdraw: ethers.Contract) {
 
     if (withdrawnContribs.has(`${itemID}@${address}`)) continue;
     withdrawnContribs.add(`${itemID}@${address}`);
+    const nonce = await signer.getTransactionCount();
 
     try {
       batchWithdraw.batchRequestWithdraw(
@@ -48,7 +49,8 @@ async function run(batchWithdraw: ethers.Contract) {
         0,
         0,
         0,
-        0
+        0,
+        { nonce }
       );
     } catch (error) {
       console.error(
@@ -76,9 +78,9 @@ export default async function lightGtcrBot() {
     signer
   );
 
-  run(batchWithdraw);
+  run(batchWithdraw, signer);
   setInterval(
-    () => run(batchWithdraw),
+    () => run(batchWithdraw, signer),
     Number(process.env.POLL_PERIOD_MINUTES) * 1000
   );
 }
