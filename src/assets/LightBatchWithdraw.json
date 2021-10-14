@@ -19,11 +19,6 @@
       },
       {
         "internalType": "uint256",
-        "name": "_request",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
         "name": "_cursor",
         "type": "uint256"
       },
@@ -31,9 +26,19 @@
         "internalType": "uint256",
         "name": "_count",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_roundCursor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_roundCount",
+        "type": "uint256"
       }
     ],
-    "name": "batchRoundWithdraw",
+    "name": "batchRequestWithdraw",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -59,6 +64,11 @@
       },
       {
         "internalType": "uint256",
+        "name": "_request",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
         "name": "_cursor",
         "type": "uint256"
       },
@@ -66,19 +76,9 @@
         "internalType": "uint256",
         "name": "_count",
         "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_roundCursor",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_roundCount",
-        "type": "uint256"
       }
     ],
-    "name": "batchRequestWithdraw",
+    "name": "batchRoundWithdraw",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
