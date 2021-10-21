@@ -58,7 +58,7 @@ async function run(batchWithdraw: ethers.Contract, signer: ethers.Wallet) {
       console.error(
         `Failed to withdraw rewards for light curate TCR request. Parameters: address: ${address}, contributor: ${contributor}, itemID: ${itemID}`
       );
-      console.warn(error);
+      console.error(error);
     }
   }
 }

@@ -75,6 +75,7 @@ async function run(signer: ethers.Wallet) {
       console.error(
         `Failed to execute request for light curate item ${request.item.itemID}`
       );
+      console.error(error);
     }
   }
 }
