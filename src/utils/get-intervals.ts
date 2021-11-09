@@ -18,7 +18,7 @@ export default function (
   for (let i = 1; i < numRequests; i++) {
     intervals[i] = {
       fromBlock: intervals[i - 1].toBlock + 1,
-      toBlock: intervals[i - 1].toBlock + 1 + blocksPerRequest,
+      toBlock: Math.min(intervals[i - 1].toBlock + 1 + blocksPerRequest, currentBlock),
     };
   }
   return intervals;
