@@ -1,12 +1,12 @@
-declare module 'level'
-declare module 'node-fetch'
+declare module "level";
+declare module "node-fetch";
 
 interface BlockInterval {
-  fromBlock: number
-  toBlock: number
+  fromBlock: number;
+  toBlock: number;
 }
 
 interface Level {
-  get: Function
-  put: Function
+  get: Function;
+  put: Function;
 }

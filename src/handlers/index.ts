@@ -1,8 +1,8 @@
-import { ethers } from 'ethers'
+import { ethers } from "ethers";
 
-import requestSubmittedHandler from './request-submitted'
-import requestResolvedHandler from './request-resolved'
-import Store from '../utils/store'
+import requestSubmittedHandler from "./request-submitted";
+import requestResolvedHandler from "./request-resolved";
+import Store from "../utils/store";
 
 async function addTCRListeners(
   tcr: ethers.Contract,
@@ -13,10 +13,7 @@ async function addTCRListeners(
   signer: ethers.Wallet
 ) {
   // Submissions and removal requests.
-  tcr.on(
-    tcr.filters.RequestSubmitted(),
-    requestSubmittedHandler(store ,tcr)
-  )
+  tcr.on(tcr.filters.RequestSubmitted(), requestSubmittedHandler(store, tcr));
 
   // Request resolved.
   tcr.on(
@@ -29,9 +26,9 @@ async function addTCRListeners(
       store,
       signer
     )
-  )
+  );
 
-  console.info(`Setup listeners for ${tcr.address}`)
+  console.info(`Setup listeners for ${tcr.address}`);
 }
 
-export { addTCRListeners }
+export { addTCRListeners };

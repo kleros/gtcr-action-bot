@@ -8,7 +8,7 @@ export default function (
   fromBlock: number,
   currentBlock: number,
   blocksPerRequest: number = 1000000
-) : BlockInterval[] {
+): BlockInterval[] {
   // Fetching event logs in a single request can (this was happening) cause
   // the provider to timeout the request.
   // To get around this we can split it into multiple, smaller requests.
@@ -18,7 +18,10 @@ export default function (
   for (let i = 1; i < numRequests; i++) {
     intervals[i] = {
       fromBlock: intervals[i - 1].toBlock + 1,
-      toBlock: Math.min(intervals[i - 1].toBlock + 1 + blocksPerRequest, currentBlock),
+      toBlock: Math.min(
+        intervals[i - 1].toBlock + 1 + blocksPerRequest,
+        currentBlock
+      ),
     };
   }
   return intervals;
