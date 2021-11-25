@@ -1,7 +1,11 @@
 [
   {
     "inputs": [
-      { "internalType": "address", "name": "_GTCR", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "_GTCR",
+        "type": "address"
+      }
     ],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -24,7 +28,13 @@
     "constant": true,
     "inputs": [],
     "name": "GTCR",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "payable": false,
     "stateMutability": "view",
     "type": "function"
@@ -33,7 +43,13 @@
     "constant": true,
     "inputs": [],
     "name": "count",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "payable": false,
     "stateMutability": "view",
     "type": "function"
@@ -51,7 +67,11 @@
         "name": "_arbitratorExtraData",
         "type": "bytes"
       },
-      { "internalType": "address", "name": "_connectedTCR", "type": "address" },
+      {
+        "internalType": "address",
+        "name": "_connectedTCR",
+        "type": "address"
+      },
       {
         "internalType": "string",
         "name": "_registrationMetaEvidence",
@@ -62,7 +82,11 @@
         "name": "_clearingMetaEvidence",
         "type": "string"
       },
-      { "internalType": "address", "name": "_governor", "type": "address" },
+      {
+        "internalType": "address",
+        "name": "_governor",
+        "type": "address"
+      },
       {
         "internalType": "uint256[4]",
         "name": "_baseDeposits",
@@ -78,7 +102,11 @@
         "name": "_stakeMultipliers",
         "type": "uint256[3]"
       },
-      { "internalType": "address", "name": "_relayContract", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "_relayContract",
+        "type": "address"
+      }
     ],
     "name": "deploy",
     "outputs": [],
@@ -88,7 +116,13 @@
   },
   {
     "constant": true,
-    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "name": "instances",
     "outputs": [
       {

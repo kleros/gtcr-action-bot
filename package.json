@@ -11,7 +11,7 @@
     "start:kovan": "env-cmd -f ./.env.kovan ts-node --transpile-only --files -r dotenv-safe/config ./src/index.ts",
     "lint:secrets": "secretlint \"**/*\"",
     "lint": "npm run lint:secrets",
-    "cleanDB": "rimraf ./db/* && nodetouch ./db/.gitkeep",
+    "cleanDB": "rimraf ./db-*",
     "release": "standard-version"
   },
   "author": "Kleros",

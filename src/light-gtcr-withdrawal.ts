@@ -5,6 +5,7 @@ import "colors";
 import _LightBatchWidthdraw from "./assets/LightBatchWithdraw.json";
 
 async function run(batchWithdraw: ethers.Contract, signer: ethers.Wallet) {
+  console.info(`Checking for pending withdrawals.`.yellow);
   const subgraphQuery = {
     query: `
       {
@@ -28,10 +29,11 @@ async function run(batchWithdraw: ethers.Contract, signer: ethers.Wallet) {
 
     lcontributions = parsed.data.lcontributions;
   } catch (error) {
-    console.error(`Failed to fetch lcontributions`, error);
-    console.error(`response`, response);
+    console.error(`Failed to fetch lcontributions`.yellow, error);
+    console.error(`response`.yellow, response);
     return;
   }
+  console.info(`Withdrawable contributions: ${lcontributions.length}`.yellow);
 
   let withdrawnContribs = new Set<string>();
   for (let contribution of lcontributions) {
@@ -57,6 +59,7 @@ async function run(batchWithdraw: ethers.Contract, signer: ethers.Wallet) {
     } catch (error) {
       console.error(
         `Failed to withdraw rewards for light curate TCR request. Parameters: address: ${address}, contributor: ${contributor}, itemID: ${itemID}`
+          .yellow
       );
       console.error(error);
     }
@@ -66,14 +69,15 @@ async function run(batchWithdraw: ethers.Contract, signer: ethers.Wallet) {
 // Start bot.
 export default async function lightGtcrBot() {
   if (!process.env.GTCR_SUBGRAPH_URL || !process.env.LBATCH_WITHDRAW_ADDRESS) {
-    console.warn("No subgraph URL detected. Aborting lightGTCRExecution bot");
+    console.warn("No subgraph URL detected. Aborting lightGTCRWithdrawal bot");
     return;
   }
-  console.info("Starting light curate withdrawal bot...");
+  console.info("Starting light curate withdrawal bot...".yellow);
   const provider = new ethers.providers.JsonRpcProvider(
     process.env.PROVIDER_URL
   );
   const signer = new ethers.Wallet(process.env.WALLET_KEY, provider);
+
   const batchWithdraw = new ethers.Contract(
     process.env.LBATCH_WITHDRAW_ADDRESS as string,
     _LightBatchWidthdraw,
@@ -83,6 +87,6 @@ export default async function lightGtcrBot() {
   run(batchWithdraw, signer);
   setInterval(
     () => run(batchWithdraw, signer),
-    Number(process.env.POLL_PERIOD_MINUTES) * 1000
+    Number(process.env.POLL_PERIOD_MINUTES) * 60 * 1000
   );
 }
