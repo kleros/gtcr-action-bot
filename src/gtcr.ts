@@ -136,39 +136,50 @@ export default async function gtcrBot() {
     // The ItemStatusChange event is emitted when a request is resolved
     // and contain the status of the request, so we can use it
     // to separate requests into resolved and not resolved.
-    const [
-      requestSubmittedEvents,
-      itemStatusChangeEvents,
-      challengePeriodDuration,
-    ] = await Promise.all([
-      (
-        await Promise.all(
-          intervals.map(async (interval) =>
-            provider.getLogs({
-              ...tcr.filters.RequestSubmitted(),
-              ...interval,
-            })
+    let requestSubmittedEvents;
+    let itemStatusChangeEvents: any;
+    let challengePeriodDuration;
+    try {
+      [
+        requestSubmittedEvents,
+        itemStatusChangeEvents,
+        challengePeriodDuration,
+      ] = await Promise.all([
+        (
+          await Promise.all(
+            intervals.map(async (interval) =>
+              provider.getLogs({
+                ...tcr.filters.RequestSubmitted(),
+                ...interval,
+              })
+            )
           )
         )
-      )
-        .reduce((acc, curr) => [...acc, ...curr])
-        .map((rawEvent) => tcr.interface.parseLog(rawEvent)),
+          .reduce((acc, curr) => [...acc, ...curr])
+          .map((rawEvent) => tcr.interface.parseLog(rawEvent)),
 
-      (
-        await Promise.all(
-          intervals.map(async (interval) =>
-            provider.getLogs({
-              ...tcr.filters.ItemStatusChange(),
-              ...interval,
-            })
+        (
+          await Promise.all(
+            intervals.map(async (interval) =>
+              provider.getLogs({
+                ...tcr.filters.ItemStatusChange(),
+                ...interval,
+              })
+            )
           )
         )
-      )
-        .reduce((acc, curr) => [...acc, ...curr])
-        .map((rawEvent) => tcr.interface.parseLog(rawEvent)),
+          .reduce((acc, curr) => [...acc, ...curr])
+          .map((rawEvent) => tcr.interface.parseLog(rawEvent)),
 
-      tcr.challengePeriodDuration(),
-    ]);
+        tcr.challengePeriodDuration(),
+      ]);
+    } catch (error) {
+      console.error(
+        `Error fetching events and challenge period duration`,
+        error
+      );
+      continue;
+    }
 
     // Pending requests never had a ItemStatusChange event
     // emitted with the _resolved field set to true.
@@ -193,13 +204,22 @@ export default async function gtcrBot() {
       );
       pendingRequestCount++;
 
+      let submissionTime, disputed, resolved;
       const {
         args: { _itemID, _requestIndex },
       } = pendingRequest;
-      const { submissionTime, disputed, resolved } = await tcr.getRequestInfo(
-        _itemID,
-        _requestIndex
-      );
+      try {
+        const response = await tcr.getRequestInfo(_itemID, _requestIndex);
+        submissionTime = response.submissionTime;
+        disputed = response.disputed;
+        resolved = response.resolved;
+      } catch (error) {
+        console.error(
+          `Failed to get request ${_requestIndex} for ${_itemID}@${tcr.address}`,
+          error
+        );
+        continue;
+      }
       if (disputed) continue; // There is an ongoing dispute. No-op.
       if (resolved) continue; // Someone already executed it.
 
@@ -213,10 +233,18 @@ export default async function gtcrBot() {
           `  Found executable request for item of ID ${_itemID} of TCR at ${tcr.address}`
         );
         console.info("  Executing it.".cyan);
-        await tcr.executeRequest(_itemID, {
-          nonce,
-        });
-        nonce++;
+        try {
+          await tcr.executeRequest(_itemID, {
+            nonce,
+          });
+          nonce++;
+        } catch (error) {
+          console.error(
+            `Error executing request for itemID ${_itemID}@${tcr.address}`,
+            error
+          );
+          continue;
+        }
       } else {
         await store.addToWatchlist(
           tcr.address,
@@ -278,17 +306,29 @@ export default async function gtcrBot() {
   setInterval(async function watcher() {
     console.info();
     console.info(`Checking for executable items, ${new Date().toUTCString()}`);
-    const [dbState, blockHeight] = await Promise.all([
-      store.getDB(),
-      provider.getBlockNumber(),
-    ]);
+    let dbState;
+    let blockHeight;
+
+    try {
+      [dbState, blockHeight] = await Promise.all([
+        store.getDB(),
+        provider.getBlockNumber(),
+      ]);
+    } catch (error) {
+      console.error(`Error fetching dbState and blockHeight`, error);
+      return;
+    }
 
     // Take previous block to avoid returning null due to outdated
     // blockchain data.
     let block;
     while (!block) {
       // Sometimes getBlock returns null for some reason. Try again.
-      block = await provider.getBlock(blockHeight - 1);
+      try {
+        block = await provider.getBlock(blockHeight - 1);
+      } catch (error) {
+        console.warn(`Error fetching block, trying again.`, error);
+      }
     }
     const { timestamp } = block;
 
@@ -311,12 +351,33 @@ export default async function gtcrBot() {
         console.info(`Item of ID ${itemID} of TCR at ${tcrAddress}`);
         console.info("Checking if it is resolved...".cyan);
         const tcr = new ethers.Contract(tcrAddress, _GeneralizedTCR, signer);
-        const { numberOfRequests } = await tcr.getItemInfo(itemID);
+        let numberOfRequests;
+        try {
+          const itemInfo = await tcr.getItemInfo(itemID);
+          numberOfRequests = itemInfo.numberOfRequests;
+        } catch (error) {
+          console.error(
+            `Error fetching itemInfor ${itemID}@${tcr.address}`,
+            error
+          );
+          continue;
+        }
+
         const requestID = numberOfRequests.toNumber() - 1;
-        const { resolved, disputed } = await tcr.getRequestInfo(
-          itemID,
-          requestID
-        );
+        let resolved;
+        let disputed;
+        try {
+          const requestInfo = await tcr.getRequestInfo(itemID, requestID);
+          resolved = requestInfo.resolved;
+          disputed = requestInfo.disputed;
+        } catch (error) {
+          console.error(
+            `Error fetching request info ${itemID}@${tcr.address}-${requestID}`,
+            error
+          );
+          continue;
+        }
+
         console.info(`Disputed: ${disputed} Resolved: ${resolved}`);
 
         if (!disputed && !resolved) {
