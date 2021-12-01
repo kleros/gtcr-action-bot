@@ -296,15 +296,10 @@ export default async function gtcrBot() {
     let i = 1;
     for (let tcrAddress of Object.keys(dbState)) {
       const tcrWatchList = dbState[tcrAddress];
-      console.info(`${i} of ${Object.keys(dbState).length}`);
-      console.info(
-        `  ${Object.keys(tcrWatchList).length} items in the watchlist`
-      );
       i++;
 
       let j = 1;
       for (let itemID of Object.keys(tcrWatchList)) {
-        console.info(`  ${j} of ${Object.keys(tcrWatchList).length}`);
         j++;
 
         const challengePeriodEnd = dbState[tcrAddress][itemID];

@@ -52,7 +52,7 @@ async function run(signer: ethers.Wallet) {
     try {
       nonce = await signer.getTransactionCount();
     } catch (error) {
-      console.error(`Error fetching nonce`.green);
+      console.error(`Error fetching nonce`.green, error);
       return;
     }
     try {
