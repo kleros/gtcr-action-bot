@@ -75,7 +75,8 @@ async function run(signer: ethers.Wallet) {
       console.info(
         `Executing request for item ID ${request.item.itemID}`.green
       );
-      await tcr.executeRequest(request.item.itemID, { nonce });
+      // pass gas requirement manually for arbitrum rinkeby compatibility
+      await tcr.executeRequest(request.item.itemID, { nonce, gasLimit: 2_100_000 });
       await delay(120 * 1000); // Wait 2 minutes to give time for the chain to sync/nonce handling.
     } catch (error) {
       console.error(
