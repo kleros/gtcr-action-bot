@@ -23,6 +23,9 @@ async function run(batchWithdraw: ethers.Contract, signer: ethers.Wallet) {
     response = await fetch(process.env.GTCR_SUBGRAPH_URL, {
       method: "POST",
       body: JSON.stringify(subgraphQuery),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
 
     const parsed = await response.json();
