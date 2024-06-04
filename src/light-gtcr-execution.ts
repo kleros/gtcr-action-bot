@@ -29,6 +29,9 @@ async function run(signer: ethers.Wallet) {
     response = await fetch(process.env.GTCR_SUBGRAPH_URL, {
       method: "POST",
       body: JSON.stringify(subgraphQuery),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
 
     const parsed = await response.json();
@@ -76,7 +79,10 @@ async function run(signer: ethers.Wallet) {
         `Executing request for item ID ${request.item.itemID}`.green
       );
       // pass gas requirement manually for arbitrum rinkeby compatibility
-      await tcr.executeRequest(request.item.itemID, { nonce, gasLimit: 2_100_000 });
+      await tcr.executeRequest(request.item.itemID, {
+        nonce,
+        gasLimit: 2_100_000,
+      });
       await delay(120 * 1000); // Wait 2 minutes to give time for the chain to sync/nonce handling.
     } catch (error) {
       console.error(
