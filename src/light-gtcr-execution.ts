@@ -1,7 +1,7 @@
+import "colors";
+import delay from "delay";
 import { ethers } from "ethers";
 import fetch from "node-fetch";
-import delay from "delay";
-import "colors";
 
 import _LightGeneralizedTCR from "./assets/LightGeneralizedTCR.json";
 
@@ -10,7 +10,7 @@ async function run(signer: ethers.Wallet) {
   const subgraphQuery = {
     query: `
       {
-        lrequests(where: { resolved: false, disputed: false }) {
+        lrequests(where: { resolved: false, disputed: false }, first: 1000) {
           submissionTime
           item {
             itemID
@@ -45,12 +45,28 @@ async function run(signer: ethers.Wallet) {
   console.info(`Pending requests: ${lrequests.length}`.green);
 
   for (let request of lrequests) {
+    console.info(
+      `Executing request for item ID ${request.item.itemID} @ ${request.registry.id}`
+        .green
+    );
+
     let challengePeriodDuration;
     const tcr = new ethers.Contract(
       request.registry.id,
       _LightGeneralizedTCR,
       signer
     );
+
+    // double check against the contract if the item is still in pending state.
+    const itemInfo = await tcr.callStatic.getItemInfo(request.item.itemID);
+    if (itemInfo.status === 1 || itemInfo.status === 0) {
+      console.warn(
+        `The item ${request.item.itemID} is not in pending state. Current status: ${itemInfo.status}. Skipping entry`
+          .yellow
+      );
+      continue;
+    }
+
     let nonce;
     try {
       nonce = await signer.getTransactionCount();
@@ -71,27 +87,27 @@ async function run(signer: ethers.Wallet) {
     const challengePeriodEnd =
       Number(request.submissionTime) + challengePeriodDuration;
     if (Date.now() / 1000 < challengePeriodEnd) {
+      console.debug("Challenge period not yet over. Skipping entry".green);
       continue;
     }
 
     try {
-      console.info(
-        `Executing request for item ID ${request.item.itemID}`.green
-      );
       // pass gas requirement manually for arbitrum rinkeby compatibility
-      await tcr.executeRequest(request.item.itemID, {
+      const tx = await tcr.executeRequest(request.item.itemID, {
         nonce,
         gasLimit: 2_100_000,
       });
       await delay(120 * 1000); // Wait 2 minutes to give time for the chain to sync/nonce handling.
+      console.info(`ExecuteRequest sent. Transaction hash: ${tx.hash}`.green);
     } catch (error) {
       console.error(
-        `Failed to execute request for light curate item ${request.item.itemID}`
+        `Failed to execute request for light curate item ${request.item.itemID} @ ${request.registry.id}`
           .green
       );
       console.error(error);
     }
   }
+  console.log(`All the items unregistered have been controlled`.green);
 }
 
 // Start bot.
