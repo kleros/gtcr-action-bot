@@ -10,7 +10,7 @@ async function run(signer: ethers.Wallet) {
   const subgraphQuery = {
     query: `
       {
-       lrequests: LRequest(where: { resolved: {_eq: false}, disputed: {_eq: false} }, limit: 1000) {
+       lrequests: LRequest(where: { resolved: {_eq: false}, disputed: {_eq: false}, chainId: {_eq: 100} }, limit: 1000) {
           submissionTime
           item {
             itemID
