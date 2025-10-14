@@ -9,7 +9,7 @@ async function run(batchWithdraw: ethers.Contract, signer: ethers.Wallet) {
   const subgraphQuery = {
     query: `
       {
-        lcontributions: LContribution(where: { withdrawable: {_eq :true}, chainId: {_eq: 100} }) {
+        lcontributions: LContribution(where: { withdrawable: {_eq :true}, chainId: {_eq: ${process.env.GTCR_SUBGRAPH_CHAIN_ID}} }) {
           id
           contributor
         }
