@@ -7,10 +7,17 @@ import _LightGeneralizedTCR from "./assets/LightGeneralizedTCR.json";
 
 async function run(signer: ethers.Wallet) {
   console.info(`Checking for pending requests.`.green);
+
+  const chainId = Number(process.env.GTCR_SUBGRAPH_CHAIN_ID);
+  if (isNaN(chainId)) {
+    console.error(`Invalid GTCR_SUBGRAPH_CHAIN_ID. Must be a number.`.red);
+    return;
+  }
+
   const subgraphQuery = {
     query: `
       {
-       lrequests: LRequest(where: { resolved: {_eq: false}, disputed: {_eq: false}, chainId: {_eq: ${process.env.GTCR_SUBGRAPH_CHAIN_ID}} }, limit: 1000) {
+       lrequests: LRequest(where: { resolved: {_eq: false}, disputed: {_eq: false}, chainId: {_eq: ${chainId}} }, limit: 1000) {
           submissionTime
           item {
             itemID

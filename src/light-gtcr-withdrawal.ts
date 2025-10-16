@@ -6,10 +6,17 @@ import _LightBatchWidthdraw from "./assets/LightBatchWithdraw.json";
 
 async function run(batchWithdraw: ethers.Contract, signer: ethers.Wallet) {
   console.info(`Checking for pending withdrawals.`.yellow);
+
+  const chainId = Number(process.env.GTCR_SUBGRAPH_CHAIN_ID);
+  if (isNaN(chainId)) {
+    console.error(`Invalid GTCR_SUBGRAPH_CHAIN_ID. Must be a number.`.red);
+    return;
+  }
+
   const subgraphQuery = {
     query: `
       {
-        lcontributions: LContribution(where: { withdrawable: {_eq :true}, chainId: {_eq: ${process.env.GTCR_SUBGRAPH_CHAIN_ID}} }) {
+        lcontributions: LContribution(where: { withdrawable: {_eq :true}, chainId: {_eq: ${chainId}} }) {
           id
           contributor
         }
